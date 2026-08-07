@@ -118,26 +118,12 @@ body {
   padding-bottom: 16px;
   border-bottom: 2px solid var(--text);
 }
-.mark {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  color: var(--text-dim);
-  text-decoration: none;
-  margin-bottom: 8px;
-}
-.mark::before {
-  content: "";
+.rule {
   width: 11px;
   height: 11px;
   background: var(--accent);
-  flex: none;
+  margin-bottom: 14px;
 }
-.mark span {
-  border-bottom: 1.5px solid var(--accent);
-  padding-bottom: 2px;
-}
-.mark:hover { color: var(--accent); }
 h1 {
   font-family: var(--f-display);
   font-size: clamp(30px, 6.4vw, 48px);
@@ -148,15 +134,29 @@ h1 {
   margin: 0;
 }
 h1 em { font-style: normal; color: var(--accent); }
-.byline { font-size: 13px; color: var(--text-dim); padding-bottom: 3px; }
-.byline a {
+.byline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-dim);
+  padding-bottom: 3px;
+}
+.byline .me {
   color: var(--text);
   text-decoration: none;
   border-bottom: 1.5px solid var(--accent);
   padding-bottom: 1px;
   font-weight: 600;
 }
-.byline a:hover { color: var(--accent); }
+.byline .me:hover { color: var(--accent); }
+.byline .studio {
+  font-size: 12px;
+  color: var(--text-faint);
+  text-decoration: none;
+}
+.byline .studio:hover { color: var(--text-dim); }
 
 /* ── presets ────────────────────────────────────────────────────────── */
 .presets {
@@ -437,6 +437,8 @@ tbody tr.total td:last-child { font-size: 15px; }
 }
 .colophon a { color: var(--text); text-decoration: none; }
 .colophon a:hover { color: var(--accent); }
+.colophon .studio { color: var(--text-faint); margin-left: 14px; }
+.colophon .studio:hover { color: var(--text-dim); }
 
 /* ── narrow screens ─────────────────────────────────────────────────── */
 @media (max-width: 880px) {
@@ -445,7 +447,7 @@ tbody tr.total td:last-child { font-size: 15px; }
   .panel { position: static; padding: 20px 16px; margin: 0 -16px; border-left: 0; border-right: 0; }
   .ticker { display: flex; }
   .mast { align-items: flex-start; gap: 10px; }
-  .byline { text-align: left; padding-bottom: 0; }
+  .byline { flex-direction: row; align-items: baseline; gap: 14px; padding-bottom: 0; }
   .presets { gap: 7px; padding: 14px 0; }
   fieldset { margin-bottom: 22px; }
 }
@@ -465,11 +467,12 @@ tbody tr.total td:last-child { font-size: 15px; }
 
   <header class="mast">
     <div>
-      <a class="mark" href="https://kolidestudio.com" target="_blank" rel="noopener"><span>Kolide Studio</span></a>
+      <div class="rule"></div>
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
     </div>
     <div class="byline">
-      <a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
+      <a class="me" href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
+      <a class="studio" href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
     </div>
   </header>
 
@@ -646,8 +649,11 @@ tbody tr.total td:last-child { font-size: 15px; }
   </details>
 
   <div class="colophon">
-    <span><a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a> · Steam Revenue Estimator</span>
-    <span><a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a></span>
+    <span>Steam Revenue Estimator</span>
+    <span>
+      <a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
+      <a class="studio" href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
+    </span>
   </div>
 
 </div>
