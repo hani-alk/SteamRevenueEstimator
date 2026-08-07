@@ -1,17 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Steam Revenue Estimator — Kolide Studio</title>
+<meta name="description" content="Estimate lifetime take-home revenue for any Steam game from wishlists, price, refunds, regional pricing and US withholding tax." />
+<meta name="theme-color" content="#EADDCA" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='18' height='18' fill='%23C7352A'/%3E%3C/svg%3E" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Steam Revenue Estimator — Kolide Studio" />
+<meta property="og:description" content="Wishlists in, take-home out. Steam's tiered cut, refunds, regional pricing and withholding tax, for any game on the store." />
+<meta name="twitter:card" content="summary" />
 
 <style>
 /* ── Kolide Studio tokens ─────────────────────────────────────────────
    Three pinned colors: #111111 ink · #EADDCA bone · #C7352A signal.
    Light = bone ground. Dark = ink ground. Same three, roles swapped. */
 :root {
-  --ink:        #111111;
-  --bone:       #EADDCA;
-  --signal:     #C7352A;
-
   --ground:     #EADDCA;
   --surface:    #F2E9DA;
-  --surface-2:  #E1D2BB;
   --line:       rgba(17,17,17,0.16);
   --line-soft:  rgba(17,17,17,0.08);
   --text:       #111111;
@@ -24,12 +33,12 @@
   --bar-take:   #C7352A;
   --focus:      #C7352A;
   --shadow:     0 1px 0 rgba(17,17,17,0.06);
+  --veil:       rgba(234,221,202,0.94);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ground:     #111111;
     --surface:    #191817;
-    --surface-2:  #232120;
     --line:       rgba(234,221,202,0.18);
     --line-soft:  rgba(234,221,202,0.09);
     --text:       #EADDCA;
@@ -42,12 +51,12 @@
     --bar-take:   #D9432F;
     --focus:      #E2543F;
     --shadow:     none;
+    --veil:       rgba(17,17,17,0.94);
   }
 }
 :root[data-theme="dark"] {
   --ground:     #111111;
   --surface:    #191817;
-  --surface-2:  #232120;
   --line:       rgba(234,221,202,0.18);
   --line-soft:  rgba(234,221,202,0.09);
   --text:       #EADDCA;
@@ -60,6 +69,7 @@
   --bar-take:   #D9432F;
   --focus:      #E2543F;
   --shadow:     none;
+  --veil:       rgba(17,17,17,0.94);
 }
 
 :root {
@@ -78,13 +88,24 @@ body {
   font-family: var(--f-body);
   font-size: 15px;
   line-height: 1.5;
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
 }
 
 .wrap {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 28px 22px 64px;
+  padding: 26px 22px 56px;
+}
+
+/* label mixin used by legends, eyebrows, the colophon */
+.eyebrow, legend, th, .colophon, .mark, .presets > span {
+  font-family: var(--f-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 /* ── masthead ───────────────────────────────────────────────────────── */
@@ -93,21 +114,16 @@ body {
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: space-between;
-  gap: 16px 24px;
-  padding-bottom: 18px;
+  gap: 12px 24px;
+  padding-bottom: 16px;
   border-bottom: 2px solid var(--text);
 }
 .mark {
   display: flex;
   align-items: center;
   gap: 9px;
-  font-family: var(--f-display);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 .mark::before {
   content: "";
@@ -118,27 +134,15 @@ body {
 }
 h1 {
   font-family: var(--f-display);
-  font-size: clamp(30px, 5.6vw, 50px);
+  font-size: clamp(30px, 6.4vw, 48px);
   font-weight: 700;
   line-height: 0.98;
-  letter-spacing: -0.005em;
   text-transform: uppercase;
   text-wrap: balance;
   margin: 0;
 }
 h1 em { font-style: normal; color: var(--accent); }
-.mast p {
-  margin: 9px 0 0;
-  max-width: 46ch;
-  color: var(--text-dim);
-  font-size: 14px;
-}
-.byline {
-  font-size: 13px;
-  color: var(--text-dim);
-  text-align: right;
-  padding-bottom: 3px;
-}
+.byline { font-size: 13px; color: var(--text-dim); padding-bottom: 3px; }
 .byline a {
   color: var(--text);
   text-decoration: none;
@@ -154,18 +158,10 @@ h1 em { font-style: normal; color: var(--accent); }
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--line);
 }
-.presets > span {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  margin-right: 4px;
-}
+.presets > span { color: var(--text-faint); margin-right: 4px; }
 .chip {
   font: inherit;
   font-size: 13px;
@@ -173,8 +169,9 @@ h1 em { font-style: normal; color: var(--accent); }
   background: transparent;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 5px 13px;
+  padding: 6px 14px;
   cursor: pointer;
+  white-space: nowrap;
   transition: background 120ms, border-color 120ms, color 120ms;
 }
 .chip:hover { border-color: var(--accent); color: var(--accent); }
@@ -184,16 +181,38 @@ h1 em { font-style: normal; color: var(--accent); }
   color: var(--accent-ink);
 }
 
+/* ── running total, mobile only ─────────────────────────────────────── */
+.ticker {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0 11px;
+  margin-bottom: 2px;
+  background: var(--veil);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+}
+.ticker .k { color: var(--text-faint); }
+.ticker .v {
+  font-family: var(--f-display);
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
 /* ── layout ─────────────────────────────────────────────────────────── */
 .cols {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
   gap: 40px;
-  padding-top: 26px;
+  padding-top: 24px;
   align-items: start;
-}
-@media (max-width: 860px) {
-  .cols { grid-template-columns: 1fr; gap: 32px; }
 }
 
 fieldset {
@@ -202,31 +221,24 @@ fieldset {
   margin: 0 0 26px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 legend {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--text-faint);
-  padding: 0 0 11px;
+  padding: 0 0 10px;
   width: 100%;
   border-bottom: 1px solid var(--line-soft);
   margin-bottom: 2px;
 }
 
-/* ── sliders ────────────────────────────────────────────────────────── */
-.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 14px; align-items: center; }
+/* ── controls ───────────────────────────────────────────────────────── */
+.row { display: grid; grid-template-columns: 1fr auto; gap: 3px 14px; align-items: baseline; }
 .row label { font-size: 14px; color: var(--text); }
-.row .hint { grid-column: 1 / -1; font-size: 12px; color: var(--text-faint); margin-top: -3px; }
 .row output {
   font-family: var(--f-data);
   font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  min-width: 84px;
   text-align: right;
   color: var(--text);
 }
@@ -236,20 +248,17 @@ input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 18px;
+  height: 20px;
   background: transparent;
   cursor: pointer;
   margin: 0;
+  touch-action: pan-y;
 }
-input[type="range"]::-webkit-slider-runnable-track {
-  height: 2px; background: var(--line); border-radius: 2px;
-}
-input[type="range"]::-moz-range-track {
-  height: 2px; background: var(--line); border-radius: 2px;
-}
+input[type="range"]::-webkit-slider-runnable-track { height: 2px; background: var(--line); border-radius: 2px; }
+input[type="range"]::-moz-range-track { height: 2px; background: var(--line); border-radius: 2px; }
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 15px; height: 15px; margin-top: -6.5px;
+  width: 16px; height: 16px; margin-top: -7px;
   border-radius: 50%;
   background: var(--accent);
   border: 2px solid var(--ground);
@@ -257,28 +266,36 @@ input[type="range"]::-webkit-slider-thumb {
   transition: transform 100ms;
 }
 input[type="range"]::-moz-range-thumb {
-  width: 15px; height: 15px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: var(--accent);
   border: 2px solid var(--ground);
   box-shadow: 0 0 0 1px var(--accent);
 }
 input[type="range"]:hover::-webkit-slider-thumb { transform: scale(1.15); }
-input[type="range"]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 32%, transparent); }
-input[type="range"]:focus-visible::-moz-range-thumb { box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 32%, transparent); }
+input[type="range"]:focus-visible::-webkit-slider-thumb,
+input[type="range"]:focus-visible::-moz-range-thumb {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 32%, transparent);
+}
+@media (pointer: coarse) {
+  input[type="range"] { height: 30px; }
+  input[type="range"]::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -10px; }
+  input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
+}
 
 select, input[type="number"] {
   font: inherit;
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 3px;
-  padding: 7px 9px;
+  padding: 9px 10px;
   width: 100%;
+  min-width: 0;
 }
 input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-.pair { display: grid; grid-template-columns: 1fr 108px; gap: 10px; }
+.pair { display: grid; grid-template-columns: 1fr 110px; gap: 10px; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
@@ -292,26 +309,17 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   padding: 22px;
   box-shadow: var(--shadow);
 }
-@media (max-width: 860px) { .panel { position: static; } }
-
-.eyebrow {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
+.eyebrow { color: var(--text-faint); }
 .hero { margin: 6px 0 4px; }
 .hero .num {
   font-family: var(--f-display);
-  font-size: clamp(38px, 7vw, 56px);
+  font-size: clamp(40px, 9vw, 56px);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.015em;
   font-variant-numeric: tabular-nums;
   color: var(--accent);
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 .hero .alt {
   font-family: var(--f-data);
@@ -322,40 +330,19 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
 }
 
 /* stacked split bar */
-.bar {
-  display: flex;
-  gap: 2px;
-  height: 34px;
-  margin: 20px 0 12px;
-}
-.bar span {
-  min-width: 3px;
-  transition: flex-basis 180ms ease;
-}
+.bar { display: flex; gap: 2px; height: 34px; margin: 20px 0 12px; }
+.bar span { min-width: 3px; transition: flex-basis 180ms ease; }
 .bar .seg-cut  { background: var(--bar-cut); }
 .bar .seg-tax  {
   background: var(--bar-tax);
-  background-image: repeating-linear-gradient(135deg,
-    var(--line) 0 3px, transparent 3px 7px);
+  background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px);
 }
 .bar .seg-take { background: var(--bar-take); }
 .bar span:first-child { border-radius: 4px 0 0 4px; }
 .bar span:last-child  { border-radius: 0 4px 4px 0; }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px 18px;
-  font-size: 12.5px;
-  color: var(--text-dim);
-}
-.legend i {
-  display: inline-block;
-  width: 10px; height: 10px;
-  margin-right: 6px;
-  vertical-align: -1px;
-  font-style: normal;
-}
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-dim); }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; font-style: normal; }
 .legend .k-cut  { background: var(--bar-cut); }
 .legend .k-tax  { background: var(--bar-tax); background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px); }
 .legend .k-take { background: var(--bar-take); }
@@ -369,7 +356,7 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   margin: 20px 0;
 }
 .kpi { background: var(--surface); padding: 12px 13px; }
-.kpi .k { font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-faint); }
+.kpi .k { font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
 .kpi .v {
   font-family: var(--f-data);
   font-size: 19px;
@@ -380,21 +367,8 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { padding: 7px 0; text-align: left; }
-th {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-  border-bottom: 1px solid var(--line);
-  padding-bottom: 8px;
-}
-td:last-child, th:last-child {
-  text-align: right;
-  font-family: var(--f-data);
-  font-variant-numeric: tabular-nums;
-}
+th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+td:last-child, th:last-child { text-align: right; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
 tbody td { border-bottom: 1px solid var(--line-soft); color: var(--text-dim); }
 tbody td:last-child { color: var(--text); }
 tbody tr.minus td:last-child { color: var(--accent); }
@@ -402,14 +376,13 @@ tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color
 tbody tr.total td:last-child { font-size: 15px; }
 
 .scenarios { margin-top: 22px; }
-.scenarios table td:first-child { color: var(--text-dim); }
 
-.tools { display: flex; gap: 8px; margin-top: 20px; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .btn {
   font: inherit;
   font-size: 13px;
-  flex: 1;
-  padding: 9px 12px;
+  flex: 1 1 92px;
+  padding: 10px 12px;
   background: transparent;
   color: var(--text);
   border: 1px solid var(--line);
@@ -419,51 +392,68 @@ tbody tr.total td:last-child { font-size: 15px; }
 }
 .btn:hover { border-color: var(--accent); color: var(--accent); }
 
-.notes {
-  margin-top: 42px;
-  padding-top: 20px;
-  border-top: 1px solid var(--line);
-  font-size: 13px;
-  color: var(--text-dim);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 10px 32px;
-}
-.notes h2 {
-  grid-column: 1 / -1;
+/* ── assumptions, folded away ───────────────────────────────────────── */
+.notes { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--line); }
+.notes summary {
   font-family: var(--f-display);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-faint);
-  margin: 0 0 4px;
+  cursor: pointer;
+  list-style: none;
 }
-.notes p { margin: 0; }
-.notes b { color: var(--text); font-weight: 600; }
+.notes summary::-webkit-details-marker { display: none; }
+.notes summary::before { content: "+ "; color: var(--accent); }
+.notes[open] summary::before { content: "− "; }
+.notes summary:hover { color: var(--accent); }
+.notes dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px 32px;
+  margin: 18px 0 0;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.notes dt { font-weight: 600; color: var(--text); }
+.notes dd { margin: 2px 0 0; }
 
 .colophon {
-  margin-top: 34px;
-  padding-top: 16px;
+  margin-top: 30px;
+  padding-top: 14px;
   border-top: 2px solid var(--text);
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 8px 20px;
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  gap: 6px 20px;
   color: var(--text-faint);
 }
 .colophon a { color: var(--text); text-decoration: none; }
 .colophon a:hover { color: var(--accent); }
 
+/* ── narrow screens ─────────────────────────────────────────────────── */
+@media (max-width: 880px) {
+  .wrap { padding: 20px 16px 44px; }
+  .cols { grid-template-columns: 1fr; gap: 30px; padding-top: 20px; }
+  .panel { position: static; padding: 20px 16px; margin: 0 -16px; border-left: 0; border-right: 0; }
+  .ticker { display: flex; }
+  .mast { align-items: flex-start; gap: 10px; }
+  .byline { text-align: left; padding-bottom: 0; }
+  .presets { gap: 7px; padding: 14px 0; }
+  fieldset { margin-bottom: 22px; }
+}
+@media (max-width: 380px) {
+  .kpis { grid-template-columns: 1fr; }
+  .pair { grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
 </style>
+</head>
+<body>
 
 <div class="wrap">
 
@@ -471,11 +461,8 @@ tbody tr.total td:last-child { font-size: 15px; }
     <div>
       <div class="mark">Kolide Studio</div>
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
-      <p>Wishlists in, take-home out. Steam's tiered cut, refunds, regional pricing and
-         US withholding, all accounted for — for any game on the store.</p>
     </div>
     <div class="byline">
-      Built by<br />
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
     </div>
   </header>
@@ -486,6 +473,11 @@ tbody tr.total td:last-child { font-size: 15px; }
     <button class="chip" type="button" data-preset="indie">Small indie</button>
     <button class="chip" type="button" data-preset="premium">Premium indie</button>
     <button class="chip" type="button" data-preset="hit">Breakout hit</button>
+  </div>
+
+  <div class="ticker" aria-hidden="true">
+    <span class="k eyebrow">In your pocket</span>
+    <span class="v" id="t-take">—</span>
   </div>
 
   <div class="cols">
@@ -506,7 +498,6 @@ tbody tr.total td:last-child { font-size: 15px; }
           <label for="s-wl">Wishlists at launch</label>
           <output id="v-wl" for="s-wl">10,000</output>
           <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" />
-          <div class="hint">Log scale, 100 to 1,000,000.</div>
         </div>
       </fieldset>
 
@@ -514,68 +505,57 @@ tbody tr.total td:last-child { font-size: 15px; }
         <legend>Sales model</legend>
 
         <div class="row">
-          <label for="s-conv">Week-one wishlist conversion</label>
+          <label for="s-conv">Week-one conversion</label>
           <output id="v-conv" for="s-conv">12%</output>
           <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" />
-          <div class="hint">Share of wishlists that buy in week one. Typical: 8–20%.</div>
         </div>
 
         <div class="row">
           <label for="s-organic">Organic multiplier</label>
           <output id="v-organic" for="s-organic">1.4×</output>
           <input type="range" id="s-organic" min="1" max="4" step="0.1" value="1.4" />
-          <div class="hint">Non-wishlist buyers: store traffic, streamers, gifts, co-op friends.</div>
         </div>
 
         <div class="row">
-          <label for="s-tail">Long-tail multiplier</label>
+          <label for="s-tail">Long tail</label>
           <output id="v-tail" for="s-tail">3.0×</output>
           <input type="range" id="s-tail" min="1" max="12" step="0.5" value="3" />
-          <div class="hint">Lifetime units ÷ launch-week units. Sales events do the heavy lifting.</div>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>What erodes the price</legend>
+        <legend>Price erosion</legend>
 
         <div class="row">
           <label for="s-reg">Regional pricing + discounts</label>
           <output id="v-reg" for="s-reg">25%</output>
           <input type="range" id="s-reg" min="0" max="60" step="1" value="25" />
-          <div class="hint">Average discount off list across the lifetime, cheap regions included.</div>
         </div>
 
         <div class="row">
           <label for="s-ref">Refund rate</label>
           <output id="v-ref" for="s-ref">8%</output>
           <input type="range" id="s-ref" min="0" max="25" step="0.5" value="8" />
-          <div class="hint">Steam refunds under 2 hours played, no questions asked.</div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Getting paid</legend>
 
-        <div class="row">
-          <label for="s-tax">US withholding on royalties</label>
-        </div>
+        <div class="row"><label for="s-tax">US withholding</label></div>
         <select id="s-tax">
-          <option value="30" selected>30% — no US tax treaty (default rate)</option>
-          <option value="15">15% — 15% treaty rate (e.g. India, Indonesia)</option>
-          <option value="10">10% — 10% treaty rate (e.g. Poland, Türkiye)</option>
-          <option value="5">5% — 5% treaty rate (e.g. Australia, Spain)</option>
-          <option value="0">0% — 0% treaty rate (e.g. UK, Germany, France, Japan)</option>
+          <option value="30" selected>30% — no US tax treaty</option>
+          <option value="15">15% — treaty rate (India, Indonesia)</option>
+          <option value="10">10% — treaty rate (Poland, Türkiye)</option>
+          <option value="5">5% — treaty rate (Australia, Spain)</option>
+          <option value="0">0% — treaty rate (UK, Germany, France, Japan)</option>
         </select>
-        <div class="hint" style="margin-top:-6px;">Set by the W-8BEN you file with Valve. Confirm your own rate with an accountant.</div>
 
-        <div class="row" style="margin-top:4px;">
-          <label for="s-cur">Show a second currency</label>
-        </div>
+        <div class="row"><label for="s-cur">Second currency</label></div>
         <div class="pair">
           <select id="s-cur"></select>
           <input type="number" id="s-rate" step="0.0001" min="0" aria-label="Units per US dollar" />
         </div>
-        <div class="hint" style="margin-top:-6px;">Rates are rough. Type today's if it matters.</div>
       </fieldset>
 
     </form>
@@ -636,17 +616,28 @@ tbody tr.total td:last-child { font-size: 15px; }
     </aside>
   </div>
 
-  <section class="notes">
-    <h2>What's baked in</h2>
-    <p><b>Steam's cut is tiered.</b> 30% of gross up to $10M lifetime, 25% from $10M to $50M,
-       20% above that. Most games never leave the first tier.</p>
-    <p><b>Gross is already net of VAT</b> and sales tax — that's how Valve reports it, so
-       there's no extra line for it here.</p>
-    <p><b>Refunds are removed as units</b> before revenue, so they cost you the full sale
-       rather than a percentage of it.</p>
-    <p><b>The $100 Steam Direct fee, storefront localisation, ports, and your own costs</b>
-       are not modelled. This is revenue, not profit.</p>
-  </section>
+  <details class="notes">
+    <summary>Assumptions</summary>
+    <dl>
+      <dt>Steam's cut is tiered</dt>
+      <dd>30% up to $10M gross, 25% to $50M, 20% above.</dd>
+
+      <dt>Gross is already net of VAT</dt>
+      <dd>That's how Valve reports it, so there's no separate line.</dd>
+
+      <dt>Refunds are removed as units</dt>
+      <dd>A refund costs you the whole sale, not a slice of it.</dd>
+
+      <dt>This is revenue, not profit</dt>
+      <dd>Steam Direct, ports, marketing and your own costs aren't modelled.</dd>
+
+      <dt>Withholding follows your W-8BEN</dt>
+      <dd>Treaty rates vary by country. Confirm yours with an accountant.</dd>
+
+      <dt>Exchange rates are approximate</dt>
+      <dd>Type today's rate over the default if it matters.</dd>
+    </dl>
+  </details>
 
   <div class="colophon">
     <span>Kolide Studio · Steam Revenue Estimator</span>
@@ -676,7 +667,6 @@ tbody tr.total td:last-child { font-size: 15px; }
     premium: { price: 24.99, wl: 30000,  conv: 10, organic: 1.3, tail: 2.5, reg: 22, ref: 6  },
     hit:     { price: 19.99, wl: 250000, conv: 18, organic: 2.2, tail: 5.0, reg: 24, ref: 6  }
   };
-  var DEFAULTS = PRESETS.indie;
 
   var $ = function (id) { return document.getElementById(id); };
   var el = {
@@ -704,9 +694,7 @@ tbody tr.total td:last-child { font-size: 15px; }
     return "$" + Math.round(n).toLocaleString("en-US");
   }
   function usdExact(n) { return "$" + Math.round(n).toLocaleString("en-US"); }
-  function units(n) {
-    return Math.round(n).toLocaleString("en-US");
-  }
+  function units(n) { return Math.round(n).toLocaleString("en-US"); }
   function pct(n) { return (Math.round(n * 10) / 10) + "%"; }
 
   // ── Steam's tiered revenue share ──
@@ -749,7 +737,6 @@ tbody tr.total td:last-child { font-size: 15px; }
     var v = read();
     var m = model(v);
 
-    // control read-outs
     $("v-price").textContent   = "$" + v.price.toFixed(2);
     $("v-wl").textContent      = units(v.wl);
     $("v-conv").textContent    = pct(v.conv * 100);
@@ -758,8 +745,8 @@ tbody tr.total td:last-child { font-size: 15px; }
     $("v-reg").textContent     = pct(v.reg * 100);
     $("v-ref").textContent     = pct(v.ref * 100);
 
-    // hero
     $("o-take").textContent  = usd(m.take);
+    $("t-take").textContent  = usd(m.take);
     $("o-take2").textContent = usdExact(m.take);
 
     var code = el.cur.value;
@@ -768,7 +755,6 @@ tbody tr.total td:last-child { font-size: 15px; }
       ? (m.take * rate).toLocaleString("en-US", { maximumFractionDigits: 0 }) + " " + code
       : "—";
 
-    // split bar
     var g = m.gross || 1;
     var pCut = m.cut / g * 100, pTax = m.withheld / g * 100, pTake = m.take / g * 100;
     $("seg-cut").style.flex  = "0 0 " + pCut + "%";
@@ -781,13 +767,11 @@ tbody tr.total td:last-child { font-size: 15px; }
       "Of gross store revenue, Steam takes " + pct(pCut) + ", withholding takes " +
       pct(pTax) + ", you keep " + pct(pTake) + ".");
 
-    // KPIs
     $("o-fw").textContent  = units(m.firstWeek);
     $("o-lt").textContent  = units(m.lifetime);
     $("o-eff").textContent = "$" + m.effPrice.toFixed(2);
     $("o-per").textContent = "$" + (m.kept > 0 ? (m.take / m.kept).toFixed(2) : "0.00");
 
-    // breakdown
     $("o-gross").textContent = usdExact(m.gross);
     $("o-cut").textContent   = "−" + usdExact(m.cut);
     $("o-net").textContent   = usdExact(m.net);
@@ -795,7 +779,7 @@ tbody tr.total td:last-child { font-size: 15px; }
     $("l-steam").textContent = "Steam's cut (" + pct(m.gross > 0 ? m.cut / m.gross * 100 : 30) + ")";
     $("l-wh").textContent    = "Withholding tax (" + pct(v.tax * 100) + ")";
 
-    // scenarios — conversion and long tail move together, they usually do
+    // scenarios — conversion, tail and word of mouth move together, they usually do
     function scen(cm, tm, rm) {
       var s = Object.assign({}, v);
       s.conv = v.conv * cm; s.tail = v.tail * tm; s.organic = v.organic * rm;
@@ -831,7 +815,7 @@ tbody tr.total td:last-child { font-size: 15px; }
   }
 
   function setPreset(name) {
-    var p = PRESETS[name] || DEFAULTS;
+    var p = PRESETS[name] || PRESETS.indie;
     el.price.value   = p.price;
     el.wl.value      = wlToPos(p.wl);
     el.conv.value    = p.conv;
@@ -859,7 +843,8 @@ tbody tr.total td:last-child { font-size: 15px; }
   el.cur.value = "EUR";
   el.rate.value = 0.92;
   el.cur.addEventListener("change", function () {
-    el.rate.value = el.cur.selectedOptions[0].dataset.rate;
+    var opt = el.cur.options[el.cur.selectedIndex];
+    el.rate.value = opt.dataset.rate;
     render();
   });
 
@@ -875,30 +860,38 @@ tbody tr.total td:last-child { font-size: 15px; }
   });
 
   function flash(btn, text) {
-    var old = btn.textContent;
+    var old = btn.dataset.label || btn.textContent;
+    btn.dataset.label = old;
     btn.textContent = text;
-    setTimeout(function () { btn.textContent = old; }, 1400);
+    clearTimeout(btn._t);
+    btn._t = setTimeout(function () { btn.textContent = old; }, 1400);
   }
   function toClipboard(text, btn, ok) {
-    var done = function () { flash(btn, ok); };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(text).then(done, function () { flash(btn, "Couldn't copy"); });
-    } else {
-      var t = document.createElement("textarea");
-      t.value = text; document.body.appendChild(t); t.select();
-      try { document.execCommand("copy"); done(); } catch (e) { flash(btn, "Couldn't copy"); }
-      document.body.removeChild(t);
+      navigator.clipboard.writeText(text).then(
+        function () { flash(btn, ok); },
+        function () { flash(btn, "Couldn't copy"); }
+      );
+      return;
     }
+    var t = document.createElement("textarea");
+    t.value = text;
+    t.style.position = "fixed";
+    t.style.opacity = "0";
+    document.body.appendChild(t);
+    t.select();
+    try { document.execCommand("copy"); flash(btn, ok); }
+    catch (e) { flash(btn, "Couldn't copy"); }
+    document.body.removeChild(t);
   }
 
   $("btn-copy").addEventListener("click", function () {
     var v = read(), m = model(v);
     var lines = [
       "Steam revenue estimate",
-      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " +
-        pct(v.conv * 100) + " week-one conversion",
+      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " + pct(v.conv * 100) + " week-one conversion",
       "Launch week: " + units(m.firstWeek) + " units",
-      "Lifetime: " + units(m.lifetime) + " units at " + "$" + m.effPrice.toFixed(2) + " average",
+      "Lifetime: " + units(m.lifetime) + " units at $" + m.effPrice.toFixed(2) + " average",
       "Gross: " + usdExact(m.gross),
       "Steam's cut: -" + usdExact(m.cut),
       "Withholding (" + pct(v.tax * 100) + "): -" + usdExact(m.withheld),
@@ -910,8 +903,9 @@ tbody tr.total td:last-child { font-size: 15px; }
   });
 
   $("btn-link").addEventListener("click", function () {
-    var url = location.href.split("#")[0] + "#" + serialize();
-    try { history.replaceState(null, "", "#" + serialize()); } catch (e) { /* sandboxed */ }
+    var state = serialize();
+    var url = location.href.split("#")[0] + "#" + state;
+    try { history.replaceState(null, "", "#" + state); } catch (e) { /* sandboxed */ }
     toClipboard(url, this, "Link copied");
   });
 
@@ -925,9 +919,7 @@ tbody tr.total td:last-child { font-size: 15px; }
 
   // ── boot: URL hash wins, then saved state, then the default preset ──
   var booted = false;
-  if (location.hash.length > 1) {
-    booted = apply(decodeURIComponent(location.hash.slice(1)));
-  }
+  if (location.hash.length > 1) booted = apply(decodeURIComponent(location.hash.slice(1)));
   if (!booted) {
     try {
       var stored = localStorage.getItem(KEY);
@@ -937,3 +929,6 @@ tbody tr.total td:last-child { font-size: 15px; }
   if (booted) { markPreset(null); render(); } else { setPreset("indie"); }
 })();
 </script>
+
+</body>
+</html>
