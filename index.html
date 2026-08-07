@@ -118,18 +118,12 @@ body {
   padding-bottom: 16px;
   border-bottom: 2px solid var(--text);
 }
-.rule {
-  width: 11px;
-  height: 11px;
-  background: var(--accent);
-  margin-bottom: 14px;
-}
 h1 {
   font-family: var(--f-display);
-  font-size: clamp(30px, 6.4vw, 48px);
+  font-size: clamp(31px, 6.6vw, 50px);
   font-weight: 700;
-  line-height: 0.98;
-  text-transform: uppercase;
+  line-height: 1.0;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   margin: 0;
 }
@@ -146,7 +140,7 @@ h1 em { font-style: normal; color: var(--accent); }
 .sep {
   width: 5px;
   height: 5px;
-  background: var(--accent);
+  background: var(--text-faint);
   flex: none;
 }
 
@@ -456,7 +450,6 @@ tbody tr.total td:last-child { font-size: 15px; }
 
   <header class="mast">
     <div>
-      <div class="rule"></div>
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
     </div>
     <div class="byline">
