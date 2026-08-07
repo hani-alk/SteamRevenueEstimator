@@ -136,16 +136,19 @@ h1 {
 h1 em { font-style: normal; color: var(--accent); }
 .byline {
   display: flex;
-  align-items: baseline;
-  gap: 14px;
+  align-items: center;
+  gap: 10px;
   color: var(--text-faint);
   padding-bottom: 4px;
 }
-.byline a { text-decoration: none; }
-.byline .me { color: var(--text); }
-.byline .me:hover { color: var(--accent); }
-.byline .studio { color: var(--text-faint); }
-.byline .studio:hover { color: var(--text-dim); }
+.byline a, .colophon a { color: var(--text); text-decoration: none; }
+.byline a:hover, .colophon a:hover { color: var(--accent); }
+.sep {
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  flex: none;
+}
 
 /* ── presets ────────────────────────────────────────────────────────── */
 .presets {
@@ -424,10 +427,7 @@ tbody tr.total td:last-child { font-size: 15px; }
   gap: 6px 20px;
   color: var(--text-faint);
 }
-.colophon a { color: var(--text); text-decoration: none; }
-.colophon a:hover { color: var(--accent); }
-.colophon .studio { color: var(--text-faint); margin-left: 14px; }
-.colophon .studio:hover { color: var(--text-dim); }
+.colophon .byline { padding-bottom: 0; }
 
 /* ── narrow screens ─────────────────────────────────────────────────── */
 @media (max-width: 880px) {
@@ -460,8 +460,10 @@ tbody tr.total td:last-child { font-size: 15px; }
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
     </div>
     <div class="byline">
-      <a class="me" href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
-      <a class="studio" href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
+      <span>Built by</span>
+      <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
     </div>
   </header>
 
@@ -639,9 +641,11 @@ tbody tr.total td:last-child { font-size: 15px; }
 
   <div class="colophon">
     <span>Steam Revenue Estimator</span>
-    <span>
-      <a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a>
-      <a class="studio" href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
+    <span class="byline">
+      <span>Built by</span>
+      <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
+      <span class="sep" aria-hidden="true"></span>
+      <a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
     </span>
   </div>
 
