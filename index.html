@@ -119,10 +119,11 @@ body {
   border-bottom: 2px solid var(--text);
 }
 .mark {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 9px;
   color: var(--text-dim);
+  text-decoration: none;
   margin-bottom: 8px;
 }
 .mark::before {
@@ -132,6 +133,11 @@ body {
   background: var(--accent);
   flex: none;
 }
+.mark span {
+  border-bottom: 1.5px solid var(--accent);
+  padding-bottom: 2px;
+}
+.mark:hover { color: var(--accent); }
 h1 {
   font-family: var(--f-display);
   font-size: clamp(30px, 6.4vw, 48px);
@@ -459,7 +465,7 @@ tbody tr.total td:last-child { font-size: 15px; }
 
   <header class="mast">
     <div>
-      <div class="mark">Kolide Studio</div>
+      <a class="mark" href="https://kolidestudio.com" target="_blank" rel="noopener"><span>Kolide Studio</span></a>
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
     </div>
     <div class="byline">
@@ -640,7 +646,7 @@ tbody tr.total td:last-child { font-size: 15px; }
   </details>
 
   <div class="colophon">
-    <span>Kolide Studio · Steam Revenue Estimator</span>
+    <span><a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a> · Steam Revenue Estimator</span>
     <span><a href="https://hanialkarrain.com" target="_blank" rel="noopener">hanialkarrain.com</a></span>
   </div>
 
@@ -897,7 +903,7 @@ tbody tr.total td:last-child { font-size: 15px; }
       "Withholding (" + pct(v.tax * 100) + "): -" + usdExact(m.withheld),
       "Take-home: " + usdExact(m.take),
       "",
-      "Estimated with the Kolide Studio Steam Revenue Estimator — hanialkarrain.com"
+      "Estimated with the Kolide Studio Steam Revenue Estimator — kolidestudio.com"
     ];
     toClipboard(lines.join("\n"), this, "Copied");
   });
