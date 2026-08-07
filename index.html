@@ -100,7 +100,7 @@ body {
 }
 
 /* label mixin used by legends, eyebrows, the colophon */
-.eyebrow, legend, th, .colophon, .mark, .presets > span {
+.eyebrow, legend, th, .colophon, .byline, .presets > span {
   font-family: var(--f-display);
   font-size: 11px;
   font-weight: 700;
@@ -136,26 +136,15 @@ h1 {
 h1 em { font-style: normal; color: var(--accent); }
 .byline {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--text-dim);
-  padding-bottom: 3px;
-}
-.byline .me {
-  color: var(--text);
-  text-decoration: none;
-  border-bottom: 1.5px solid var(--accent);
-  padding-bottom: 1px;
-  font-weight: 600;
-}
-.byline .me:hover { color: var(--accent); }
-.byline .studio {
-  font-size: 12px;
+  align-items: baseline;
+  gap: 14px;
   color: var(--text-faint);
-  text-decoration: none;
+  padding-bottom: 4px;
 }
+.byline a { text-decoration: none; }
+.byline .me { color: var(--text); }
+.byline .me:hover { color: var(--accent); }
+.byline .studio { color: var(--text-faint); }
 .byline .studio:hover { color: var(--text-dim); }
 
 /* ── presets ────────────────────────────────────────────────────────── */
@@ -447,7 +436,7 @@ tbody tr.total td:last-child { font-size: 15px; }
   .panel { position: static; padding: 20px 16px; margin: 0 -16px; border-left: 0; border-right: 0; }
   .ticker { display: flex; }
   .mast { align-items: flex-start; gap: 10px; }
-  .byline { flex-direction: row; align-items: baseline; gap: 14px; padding-bottom: 0; }
+  .byline { padding-bottom: 0; }
   .presets { gap: 7px; padding: 14px 0; }
   fieldset { margin-bottom: 22px; }
 }
