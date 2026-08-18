@@ -323,26 +323,31 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
 .kpis {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1px;
-  background: var(--line-soft);
-  border: 1px solid var(--line-soft);
-  margin: 20px 0;
+  gap: 6px 20px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
 }
-.kpi { background: var(--surface); padding: 12px 13px; }
-.kpi .k { font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text-faint); }
+.kpi { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 9px; }
+.kpi .k {
+  flex-basis: 100%;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
 .kpi .v {
   font-family: var(--f-data);
-  font-size: 19px;
+  font-size: 14px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  margin-top: 3px;
+  color: var(--text-dim);
 }
 .kpi .c {
   font-family: var(--f-data);
-  font-size: 12px;
+  font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   color: var(--text-faint);
-  margin-top: 2px;
 }
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
@@ -360,6 +365,17 @@ tbody tr.total td.val { font-size: 15px; }
 .scenarios { margin-top: 22px; }
 .timeline { margin-top: 6px; }
 .timeline th:first-child { width: 34%; }
+.timeline tbody td { padding: 11px 0; }
+.timeline tbody td.val {
+  font-family: var(--f-display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+.timeline tbody td:first-child { color: var(--text); }
+.timeline tbody td.cur { font-size: 12.5px; }
 
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .btn {
@@ -496,7 +512,6 @@ tbody tr.total td.val { font-size: 15px; }
       <h1>Steam Revenue<br /><em>Estimator</em></h1>
     </div>
     <div class="byline">
-      <span>Built by</span>
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
@@ -504,7 +519,7 @@ tbody tr.total td.val { font-size: 15px; }
   </header>
 
   <div class="presets">
-    <span>Start from</span>
+    <span>Presets</span>
     <button class="chip" type="button" data-preset="impulse">Impulse buy</button>
     <button class="chip" type="button" data-preset="indie">Small indie</button>
     <button class="chip" type="button" data-preset="premium">Premium indie</button>
@@ -724,7 +739,6 @@ tbody tr.total td.val { font-size: 15px; }
   <div class="colophon">
     <span>Steam Revenue Estimator</span>
     <span class="byline">
-      <span>Built by</span>
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
       <span class="sep" aria-hidden="true"></span>
       <a href="https://kolidestudio.com" target="_blank" rel="noopener">Kolide Studio</a>
