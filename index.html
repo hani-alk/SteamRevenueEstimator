@@ -4,14 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Steam Revenue Estimator</title>
-<meta name="description" content="Estimate lifetime take-home revenue for any Steam game from wishlists, price, refunds, regional pricing and US withholding tax." />
+<meta name="description" content="Estimate first-week, first-month and first-year take-home revenue for any Steam game from wishlists, price, refunds, regional pricing and US withholding tax." />
 <meta name="theme-color" content="#EADDCA" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='18' height='18' fill='%23C7352A'/%3E%3C/svg%3E" />
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Steam Revenue Estimator" />
-<meta property="og:description" content="Wishlists in, take-home out. Steam's tiered cut, refunds, regional pricing and withholding tax, for any game on the store." />
+<meta property="og:description" content="Wishlists in, take-home out. First week, first month, first year — with Steam's cut, refunds, regional pricing and withholding tax." />
 <meta name="twitter:card" content="summary" />
 
 <style>
@@ -302,27 +302,8 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   box-shadow: var(--shadow);
 }
 .eyebrow { color: var(--text-faint); }
-.hero { margin: 6px 0 4px; }
-.hero .num {
-  font-family: var(--f-display);
-  font-size: clamp(40px, 9vw, 56px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.015em;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent);
-  overflow-wrap: anywhere;
-}
-.hero .alt {
-  font-family: var(--f-data);
-  font-size: 15px;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-dim);
-  margin-top: 5px;
-}
-
 /* stacked split bar */
-.bar { display: flex; gap: 2px; height: 34px; margin: 20px 0 12px; }
+.bar { display: flex; gap: 2px; height: 34px; margin: 26px 0 12px; }
 .bar span { min-width: 3px; transition: flex-basis 180ms ease; }
 .bar .seg-cut  { background: var(--bar-cut); }
 .bar .seg-tax  {
@@ -375,14 +356,10 @@ tbody tr.minus td.val { color: var(--accent); }
 tbody td.cur { color: var(--text-faint); }
 tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color: var(--text); }
 tbody tr.total td.val { font-size: 15px; }
-tbody tr.key td { font-weight: 700; color: var(--text); }
-tbody tr.key td.cur { color: var(--text-dim); }
-tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
 
 .scenarios { margin-top: 22px; }
 .timeline { margin-top: 6px; }
 .timeline th:first-child { width: 34%; }
-.sub-label { margin-top: 22px; color: var(--text-faint); }
 
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .btn {
@@ -576,9 +553,9 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
         </div>
 
         <div class="row">
-          <label for="s-tail">Long tail</label>
-          <output id="v-tail" for="s-tail">3.0×</output>
-          <input type="range" id="s-tail" min="1" max="12" step="0.5" value="3" />
+          <label for="s-tail">First-year multiplier</label>
+          <output id="v-tail" for="s-tail">2.5×</output>
+          <input type="range" id="s-tail" min="1" max="15" step="0.5" value="2.5" />
         </div>
       </fieldset>
 
@@ -621,11 +598,18 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
 
     <!-- ── results ── -->
     <aside class="panel" aria-live="polite">
-      <div class="eyebrow">In your pocket, first year</div>
-      <div class="hero">
-        <div class="num" id="o-take">—</div>
-        <div class="alt" id="o-take-alt">—</div>
-      </div>
+      <div class="eyebrow">Take-home by milestone</div>
+      <table class="timeline">
+        <thead><tr>
+          <th scope="col">Milestone</th><th scope="col">Units</th>
+          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>First week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
+          <tr><td>First month</td><td id="o-mo">—</td><td class="val" id="o-mo-rev">—</td><td class="cur" id="o-mo-alt">—</td></tr>
+          <tr><td>First year</td><td id="o-yr">—</td><td class="val" id="o-yr-rev">—</td><td class="cur" id="o-yr-alt">—</td></tr>
+        </tbody>
+      </table>
 
       <div class="bar" id="bar" role="img" aria-label="Split of gross store revenue">
         <span class="seg-cut"  id="seg-cut"  style="flex: 0 0 30%"></span>
@@ -637,20 +621,6 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
         <span><i class="k-tax"></i><span id="l-tax">Withheld 21%</span></span>
         <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
       </div>
-
-      <div class="eyebrow sub-label">Milestones</div>
-      <table class="timeline">
-        <thead><tr>
-          <th scope="col">Milestone</th><th scope="col">Units</th>
-          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>First week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
-          <tr><td>First month</td><td id="o-mo">—</td><td class="val" id="o-mo-rev">—</td><td class="cur" id="o-mo-alt">—</td></tr>
-          <tr class="key"><td>First year</td><td id="o-yr">—</td><td class="val" id="o-yr-rev">—</td><td class="cur" id="o-yr-alt">—</td></tr>
-          <tr class="quiet"><td>Lifetime</td><td id="o-lt">—</td><td class="val" id="o-lt-rev">—</td><td class="cur" id="o-lt-alt">—</td></tr>
-        </tbody>
-      </table>
 
       <div class="kpis">
         <div class="kpi"><div class="k">Avg. sale price</div><div class="v" id="o-eff">—</div><div class="c" id="o-eff-alt">—</div></div>
@@ -698,22 +668,22 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
     <ol class="steps">
       <li><b>Launch-week units</b>
         <code>wishlists × conversion × organic</code></li>
-      <li><b>Lifetime units</b>
-        <code>first week × long tail</code>
-        <span>A lifetime is taken as three years, or 156 weeks, of selling.</span></li>
-      <li><b>Milestone units</b>
-        <code>first week × weeks ^ (ln(long tail) ÷ ln(156))</code>
-        <span>Sales pile up on a power curve rather than a straight line, and the long-tail
-              multiplier sets how steep it is. Weeks 4 and 52 read off the same curve, so a
-              game with a short tail banks most of its money in year one and a long-lived
-              one keeps earning well past it.</span></li>
+      <li><b>First-year units</b>
+        <code>first week × first-year multiplier</code>
+        <span>A 2.5× game sells one and a half times its opening week again over the
+              following eleven months.</span></li>
+      <li><b>First-month units</b>
+        <code>first week × 4 ^ (ln(first-year multiplier) ÷ ln 52)</code>
+        <span>Sales pile up on a power curve rather than a straight line, anchored so that
+              week 52 lands exactly on the first-year figure. The month reads off the same
+              curve, so nothing here depends on guessing how long the game sells for.</span></li>
       <li><b>Units you're paid for</b>
         <code>units × (1 − refund rate)</code></li>
       <li><b>Sale price at each milestone</b>
-        <code>price × (1 − erosion × (0.5 + 0.5 × share of lifetime sold))</code>
+        <code>price × (1 − erosion × (0.5 + 0.5 × share of the year sold))</code>
         <span>The first week feels half the erosion you set — regional pricing applies from
-              day one, but the deep discounts come later. By end of life it feels all of it,
-              and the milestones in between land on the ramp.</span></li>
+              day one, but the deep discounts come later. By week 52 it feels all of it, and
+              the month lands on the ramp between.</span></li>
       <li><b>Gross revenue</b>
         <code>units paid for × average sale price</code></li>
       <li><b>Steam's cut</b>
@@ -736,6 +706,9 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
 
       <dt>Refunds are removed as units</dt>
       <dd>A refund costs you the whole sale, not a slice of it.</dd>
+
+      <dt>Everything stops at twelve months</dt>
+      <dd>No guess is made about what the game earns after that.</dd>
 
       <dt>This is revenue, not profit</dt>
       <dd>Steam Direct, ports, marketing and your own costs aren't modelled.</dd>
@@ -776,10 +749,10 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
   ];
 
   var PRESETS = {
-    impulse: { price: 4.99,  wl: 6000,   conv: 15, organic: 1.8, tail: 4.0, reg: 30, ref: 10 },
-    indie:   { price: 9.99,  wl: 10000,  conv: 12, organic: 1.4, tail: 3.0, reg: 25, ref: 8  },
-    premium: { price: 24.99, wl: 30000,  conv: 10, organic: 1.3, tail: 2.5, reg: 22, ref: 6  },
-    hit:     { price: 19.99, wl: 250000, conv: 18, organic: 2.2, tail: 5.0, reg: 24, ref: 6  }
+    impulse: { price: 4.99,  wl: 6000,   conv: 15, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
+    indie:   { price: 9.99,  wl: 10000,  conv: 12, organic: 1.4, tail: 2.5, reg: 25, ref: 8  },
+    premium: { price: 24.99, wl: 30000,  conv: 10, organic: 1.3, tail: 2.0, reg: 22, ref: 6  },
+    hit:     { price: 19.99, wl: 250000, conv: 18, organic: 2.2, tail: 3.5, reg: 24, ref: 6  }
   };
 
   var $ = function (id) { return document.getElementById(id); };
@@ -847,19 +820,18 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
     };
   }
 
-  // A lifetime is taken as three years of selling.
-  var LIFETIME_WEEKS = 156;
-  // Launch week feels only half the lifetime price erosion: regional pricing
-  // applies from day one, deep discounts come later.
+  var YEAR_WEEKS = 52;
+  // Week one feels only half the year's price erosion: regional pricing applies
+  // from day one, deep discounts come later.
   var LAUNCH_SHARE = 0.5;
 
-  // Units accumulate on a power curve through week 156, where the long-tail
-  // multiplier sets the exponent: cumulative(n) = week one × n^a, with
-  // a = ln(tail) / ln(156) so cumulative(156) lands exactly on lifetime.
-  function cumulative(week1, tail, weeks) {
-    if (tail <= 1) return week1;
-    var a = Math.log(tail) / Math.log(LIFETIME_WEEKS);
-    return week1 * Math.pow(Math.min(weeks, LIFETIME_WEEKS), a);
+  // Units accumulate on a power curve across the first year, where the
+  // first-year multiplier sets the exponent: cumulative(n) = week one × n^a,
+  // with a = ln(multiplier) / ln(52) so week 52 lands exactly on the year.
+  function cumulative(week1, yearMult, weeks) {
+    if (yearMult <= 1) return week1;
+    var a = Math.log(yearMult) / Math.log(YEAR_WEEKS);
+    return week1 * Math.pow(Math.min(weeks, YEAR_WEEKS), a);
   }
 
   // Steam's tiers run from the first dollar earned, so a launch window's cut
@@ -873,36 +845,31 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
 
   function model(v) {
     var firstWeek  = v.wl * v.conv * v.organic;
-    var lifetime   = firstWeek * v.tail;
+    var firstYear  = firstWeek * v.tail;
     var firstMonth = cumulative(firstWeek, v.tail, 4);
-    var firstYear  = cumulative(firstWeek, v.tail, 52);
 
-    var paidFor  = 1 - v.ref;
-    // Erosion ramps with how much of the lifetime has sold: half of it at
-    // launch, all of it by the end, so every milestone prices between the two.
+    var paidFor = 1 - v.ref;
+    // Erosion ramps with how much of the year has sold: half of it in week one,
+    // all of it by week 52, so the month prices between the two.
     function grossAt(u) {
-      var share = lifetime > 0 ? Math.min(u / lifetime, 1) : 1;
+      var share = firstYear > 0 ? Math.min(u / firstYear, 1) : 1;
       var price = v.price * (1 - v.reg * (LAUNCH_SHARE + (1 - LAUNCH_SHARE) * share));
       return u * paidFor * price;
     }
 
     // Clamped downward so no milestone can out-earn a later one.
-    var gLife  = grossAt(lifetime);
-    var gYear  = Math.min(grossAt(firstYear), gLife);
+    var gYear  = grossAt(firstYear);
     var gMonth = Math.min(grossAt(firstMonth), gYear);
     var gWeek  = Math.min(grossAt(firstWeek), gMonth);
 
     var year = payout(gYear, v.tax);
-    var life = payout(gLife, v.tax);
 
     return {
-      firstWeek: firstWeek, firstMonth: firstMonth,
-      firstYear: firstYear, lifetime: lifetime,
+      firstWeek: firstWeek, firstMonth: firstMonth, firstYear: firstYear,
       gross: year.gross, cut: year.cut, net: year.net,
       withheld: year.withheld, take: year.take,
       weekTake: payout(gWeek, v.tax).take,
-      monthTake: payout(gMonth, v.tax).take,
-      lifeTake: life.take
+      monthTake: payout(gMonth, v.tax).take
     };
   }
 
@@ -918,12 +885,10 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
     $("v-reg").textContent     = pct(v.reg * 100);
     $("v-ref").textContent     = pct(v.ref * 100);
 
-    $("o-take").textContent  = usd(m.take);
     $("t-take").textContent  = usd(m.take);
     $("o-take2").textContent = usdExact(m.take);
 
     var code = el.cur.value;
-    $("o-take-alt").textContent = fxRate() ? fx(m.take) + " " + code : "—";
     Array.prototype.forEach.call(document.querySelectorAll(".h-cur"), function (th) {
       th.textContent = code;
     });
@@ -943,15 +908,12 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
     $("o-fw").textContent = units(m.firstWeek);
     $("o-mo").textContent = units(m.firstMonth);
     $("o-yr").textContent = units(m.firstYear);
-    $("o-lt").textContent = units(m.lifetime);
     $("o-fw-rev").textContent = usd(m.weekTake);
     $("o-mo-rev").textContent = usd(m.monthTake);
     $("o-yr-rev").textContent = usd(m.take);
-    $("o-lt-rev").textContent = usd(m.lifeTake);
     $("o-fw-alt").textContent = fx(m.weekTake);
     $("o-mo-alt").textContent = fx(m.monthTake);
     $("o-yr-alt").textContent = fx(m.take);
-    $("o-lt-alt").textContent = fx(m.lifeTake);
 
     // Both tiles describe the first year, like everything else in the panel.
     var yearPaid = m.firstYear * (1 - v.ref);
@@ -1092,7 +1054,6 @@ tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
       "First week: " + units(m.firstWeek) + " units · " + usdExact(m.weekTake) + " take-home",
       "First month: " + units(m.firstMonth) + " units · " + usdExact(m.monthTake) + " take-home",
       "First year: " + units(m.firstYear) + " units · " + usdExact(m.take) + " take-home",
-      "Lifetime: " + units(m.lifetime) + " units · " + usdExact(m.lifeTake) + " take-home",
       "",
       "First year — gross: " + usdExact(m.gross),
       "Steam's cut: -" + usdExact(m.cut),
