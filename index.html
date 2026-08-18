@@ -368,6 +368,14 @@ tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color
 tbody tr.total td:last-child { font-size: 15px; }
 
 .scenarios { margin-top: 22px; }
+.timeline { margin-top: 20px; }
+.t3 th:first-child { width: 42%; }
+.t3 th + th { text-align: right; }
+.t3 td + td {
+  text-align: right;
+  font-family: var(--f-data);
+  font-variant-numeric: tabular-nums;
+}
 
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .btn {
@@ -410,6 +418,55 @@ tbody tr.total td:last-child { font-size: 15px; }
 }
 .notes dt { font-weight: 600; color: var(--text); }
 .notes dd { margin: 2px 0 0; }
+.notes h3 {
+  font-family: var(--f-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 26px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--line-soft);
+}
+.steps {
+  list-style: none;
+  counter-reset: step;
+  margin: 18px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 13px;
+}
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 4px 10px;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.steps li::before {
+  content: counter(step);
+  grid-column: 1;
+  grid-row: 1;
+  font-family: var(--f-data);
+  font-size: 11px;
+  color: var(--text-faint);
+  line-height: 1.7;
+}
+.steps li > * { grid-column: 2; }
+.steps b { color: var(--text); font-weight: 600; }
+.steps code {
+  justify-self: start;
+  font-family: var(--f-data);
+  font-size: 12.5px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  padding: 3px 8px;
+  overflow-wrap: anywhere;
+}
 
 .colophon {
   margin-top: 30px;
@@ -572,15 +629,22 @@ tbody tr.total td:last-child { font-size: 15px; }
         <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
       </div>
 
+      <table class="t3 timeline">
+        <thead><tr><th scope="col">Window</th><th scope="col">Units</th><th scope="col">Take-home</th></tr></thead>
+        <tbody>
+          <tr><td>Launch week</td><td id="o-fw">—</td><td id="o-fw-rev">—</td></tr>
+          <tr><td>First month</td><td id="o-mo">—</td><td id="o-mo-rev">—</td></tr>
+          <tr class="total"><td>Lifetime</td><td id="o-lt">—</td><td id="o-lt-rev">—</td></tr>
+        </tbody>
+      </table>
+
       <div class="kpis">
-        <div class="kpi"><div class="k">Launch week units</div><div class="v" id="o-fw">—</div></div>
-        <div class="kpi"><div class="k">Lifetime units</div><div class="v" id="o-lt">—</div></div>
         <div class="kpi"><div class="k">Avg. sale price</div><div class="v" id="o-eff">—</div></div>
         <div class="kpi"><div class="k">You keep per copy</div><div class="v" id="o-per">—</div></div>
       </div>
 
       <table>
-        <thead><tr><th scope="col">Breakdown</th><th scope="col">USD</th></tr></thead>
+        <thead><tr><th scope="col">Lifetime breakdown</th><th scope="col">USD</th></tr></thead>
         <tbody>
           <tr><td>Gross store revenue</td><td id="o-gross">—</td></tr>
           <tr class="minus"><td id="l-steam">Steam's cut</td><td id="o-cut">—</td></tr>
@@ -610,7 +674,35 @@ tbody tr.total td:last-child { font-size: 15px; }
   </div>
 
   <details class="notes">
-    <summary>Assumptions</summary>
+    <summary>How it's calculated</summary>
+    <ol class="steps">
+      <li><b>Launch-week units</b>
+        <code>wishlists × conversion × organic</code></li>
+      <li><b>First-month units</b>
+        <code>launch week × 1.6</code>
+        <span>Sales fall roughly 40% a week after launch, so weeks two to four add about
+              60% again on top. Capped at lifetime units.</span></li>
+      <li><b>Lifetime units</b>
+        <code>launch week × long tail</code></li>
+      <li><b>Units you're paid for</b>
+        <code>units × (1 − refund rate)</code></li>
+      <li><b>Average sale price</b>
+        <code>price × (1 − erosion)</code>
+        <span>The launch window uses half the erosion — regional pricing applies from day
+              one, but the deep discounts come later.</span></li>
+      <li><b>Gross revenue</b>
+        <code>units paid for × average sale price</code></li>
+      <li><b>Steam's cut</b>
+        <code>30% to $10M · 25% to $50M · 20% above</code>
+        <span>Tiers count from your first dollar, so a launch window is charged the 30%
+              rate on its own gross.</span></li>
+      <li><b>Withholding</b>
+        <code>(gross − Steam's cut) × treaty rate</code></li>
+      <li><b>Take-home</b>
+        <code>gross − Steam's cut − withholding</code></li>
+    </ol>
+
+    <h3>Assumptions</h3>
     <dl>
       <dt>Steam's cut is tiered</dt>
       <dd>30% up to $10M gross, 25% to $50M, 20% above.</dd>
@@ -716,18 +808,42 @@ tbody tr.total td:last-child { font-size: 15px; }
     };
   }
 
+  // Weeks 2-4 add roughly 60% of launch week on top (≈40% weekly decay).
+  var MONTH_MULT = 1.6;
+  // The launch window feels only half the lifetime price erosion: regional
+  // pricing applies from day one, deep discounts come later.
+  var LAUNCH_SHARE = 0.5;
+
+  // Steam's tiers run from the first dollar earned, so a launch window's cut
+  // is just steamCut() of its own gross.
+  function payout(gross, tax) {
+    var cut = steamCut(gross);
+    var net = gross - cut;
+    var withheld = net * tax;
+    return { gross: gross, cut: cut, net: net, withheld: withheld, take: net - withheld };
+  }
+
   function model(v) {
-    var firstWeek = v.wl * v.conv * v.organic;
-    var lifetime  = firstWeek * v.tail;
-    var kept      = lifetime * (1 - v.ref);
-    var effPrice  = v.price * (1 - v.reg);
-    var gross     = kept * effPrice;
-    var cut       = steamCut(gross);
-    var net       = gross - cut;
-    var withheld  = net * v.tax;
+    var firstWeek  = v.wl * v.conv * v.organic;
+    var lifetime   = firstWeek * v.tail;
+    var firstMonth = Math.min(firstWeek * MONTH_MULT, lifetime);
+
+    var paidFor     = 1 - v.ref;
+    var kept        = lifetime * paidFor;
+    var effPrice    = v.price * (1 - v.reg);
+    var launchPrice = v.price * (1 - v.reg * LAUNCH_SHARE);
+
+    // Windows are clamped so a short tail can never make a slice out-earn the whole.
+    var life  = payout(kept * effPrice, v.tax);
+    var month = payout(Math.min(firstMonth * paidFor * launchPrice, life.gross), v.tax);
+    var week  = payout(Math.min(firstWeek * paidFor * launchPrice, month.gross), v.tax);
+
     return {
-      firstWeek: firstWeek, lifetime: lifetime, kept: kept, effPrice: effPrice,
-      gross: gross, cut: cut, net: net, withheld: withheld, take: net - withheld
+      firstWeek: firstWeek, firstMonth: firstMonth, lifetime: lifetime,
+      kept: kept, effPrice: effPrice, launchPrice: launchPrice,
+      gross: life.gross, cut: life.cut, net: life.net,
+      withheld: life.withheld, take: life.take,
+      weekTake: week.take, monthTake: month.take
     };
   }
 
@@ -765,8 +881,12 @@ tbody tr.total td:last-child { font-size: 15px; }
       "Of gross store revenue, Steam takes " + pct(pCut) + ", withholding takes " +
       pct(pTax) + ", you keep " + pct(pTake) + ".");
 
-    $("o-fw").textContent  = units(m.firstWeek);
-    $("o-lt").textContent  = units(m.lifetime);
+    $("o-fw").textContent = units(m.firstWeek);
+    $("o-mo").textContent = units(m.firstMonth);
+    $("o-lt").textContent = units(m.lifetime);
+    $("o-fw-rev").textContent = usd(m.weekTake);
+    $("o-mo-rev").textContent = usd(m.monthTake);
+    $("o-lt-rev").textContent = usd(m.take);
     $("o-eff").textContent = "$" + m.effPrice.toFixed(2);
     $("o-per").textContent = "$" + (m.kept > 0 ? (m.take / m.kept).toFixed(2) : "0.00");
 
@@ -888,7 +1008,8 @@ tbody tr.total td:last-child { font-size: 15px; }
     var lines = [
       "Steam revenue estimate",
       "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " + pct(v.conv * 100) + " week-one conversion",
-      "Launch week: " + units(m.firstWeek) + " units",
+      "Launch week: " + units(m.firstWeek) + " units · " + usdExact(m.weekTake) + " take-home",
+      "First month: " + units(m.firstMonth) + " units · " + usdExact(m.monthTake) + " take-home",
       "Lifetime: " + units(m.lifetime) + " units at $" + m.effPrice.toFixed(2) + " average",
       "Gross: " + usdExact(m.gross),
       "Steam's cut: -" + usdExact(m.cut),
