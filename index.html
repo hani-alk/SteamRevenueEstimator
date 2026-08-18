@@ -375,6 +375,9 @@ tbody tr.minus td.val { color: var(--accent); }
 tbody td.cur { color: var(--text-faint); }
 tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color: var(--text); }
 tbody tr.total td.val { font-size: 15px; }
+tbody tr.key td { font-weight: 700; color: var(--text); }
+tbody tr.key td.cur { color: var(--text-dim); }
+tbody tr.quiet td, tbody tr.quiet td.val { color: var(--text-faint); }
 
 .scenarios { margin-top: 22px; }
 .timeline { margin-top: 6px; }
@@ -618,7 +621,7 @@ tbody tr.total td.val { font-size: 15px; }
 
     <!-- ── results ── -->
     <aside class="panel" aria-live="polite">
-      <div class="eyebrow">In your pocket, lifetime</div>
+      <div class="eyebrow">In your pocket, first year</div>
       <div class="hero">
         <div class="num" id="o-take">—</div>
         <div class="alt" id="o-take-alt">—</div>
@@ -635,16 +638,17 @@ tbody tr.total td.val { font-size: 15px; }
         <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
       </div>
 
-      <div class="eyebrow sub-label">Take-home by window</div>
+      <div class="eyebrow sub-label">Milestones</div>
       <table class="timeline">
         <thead><tr>
-          <th scope="col">Window</th><th scope="col">Units</th>
+          <th scope="col">Milestone</th><th scope="col">Units</th>
           <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
         </tr></thead>
         <tbody>
-          <tr><td>Launch week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
+          <tr><td>First week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
           <tr><td>First month</td><td id="o-mo">—</td><td class="val" id="o-mo-rev">—</td><td class="cur" id="o-mo-alt">—</td></tr>
-          <tr class="total"><td>Lifetime</td><td id="o-lt">—</td><td class="val" id="o-lt-rev">—</td><td class="cur" id="o-lt-alt">—</td></tr>
+          <tr class="key"><td>First year</td><td id="o-yr">—</td><td class="val" id="o-yr-rev">—</td><td class="cur" id="o-yr-alt">—</td></tr>
+          <tr class="quiet"><td>Lifetime</td><td id="o-lt">—</td><td class="val" id="o-lt-rev">—</td><td class="cur" id="o-lt-alt">—</td></tr>
         </tbody>
       </table>
 
@@ -655,7 +659,7 @@ tbody tr.total td.val { font-size: 15px; }
 
       <table>
         <thead><tr>
-          <th scope="col">Lifetime breakdown</th>
+          <th scope="col">First-year breakdown</th>
           <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
         </tr></thead>
         <tbody>
@@ -694,24 +698,28 @@ tbody tr.total td.val { font-size: 15px; }
     <ol class="steps">
       <li><b>Launch-week units</b>
         <code>wishlists × conversion × organic</code></li>
-      <li><b>First-month units</b>
-        <code>launch week × 1.6</code>
-        <span>Sales fall roughly 40% a week after launch, so weeks two to four add about
-              60% again on top. Capped at lifetime units.</span></li>
       <li><b>Lifetime units</b>
-        <code>launch week × long tail</code></li>
+        <code>first week × long tail</code>
+        <span>A lifetime is taken as three years, or 156 weeks, of selling.</span></li>
+      <li><b>Milestone units</b>
+        <code>first week × weeks ^ (ln(long tail) ÷ ln(156))</code>
+        <span>Sales pile up on a power curve rather than a straight line, and the long-tail
+              multiplier sets how steep it is. Weeks 4 and 52 read off the same curve, so a
+              game with a short tail banks most of its money in year one and a long-lived
+              one keeps earning well past it.</span></li>
       <li><b>Units you're paid for</b>
         <code>units × (1 − refund rate)</code></li>
-      <li><b>Average sale price</b>
-        <code>price × (1 − erosion)</code>
-        <span>The launch window uses half the erosion — regional pricing applies from day
-              one, but the deep discounts come later.</span></li>
+      <li><b>Sale price at each milestone</b>
+        <code>price × (1 − erosion × (0.5 + 0.5 × share of lifetime sold))</code>
+        <span>The first week feels half the erosion you set — regional pricing applies from
+              day one, but the deep discounts come later. By end of life it feels all of it,
+              and the milestones in between land on the ramp.</span></li>
       <li><b>Gross revenue</b>
         <code>units paid for × average sale price</code></li>
       <li><b>Steam's cut</b>
         <code>30% to $10M · 25% to $50M · 20% above</code>
-        <span>Tiers count from your first dollar, so a launch window is charged the 30%
-              rate on its own gross.</span></li>
+        <span>Tiers count from your first dollar, so each milestone is charged on its
+              own gross.</span></li>
       <li><b>Withholding</b>
         <code>(gross − Steam's cut) × treaty rate</code></li>
       <li><b>Take-home</b>
@@ -839,11 +847,20 @@ tbody tr.total td.val { font-size: 15px; }
     };
   }
 
-  // Weeks 2-4 add roughly 60% of launch week on top (≈40% weekly decay).
-  var MONTH_MULT = 1.6;
-  // The launch window feels only half the lifetime price erosion: regional
-  // pricing applies from day one, deep discounts come later.
+  // A lifetime is taken as three years of selling.
+  var LIFETIME_WEEKS = 156;
+  // Launch week feels only half the lifetime price erosion: regional pricing
+  // applies from day one, deep discounts come later.
   var LAUNCH_SHARE = 0.5;
+
+  // Units accumulate on a power curve through week 156, where the long-tail
+  // multiplier sets the exponent: cumulative(n) = week one × n^a, with
+  // a = ln(tail) / ln(156) so cumulative(156) lands exactly on lifetime.
+  function cumulative(week1, tail, weeks) {
+    if (tail <= 1) return week1;
+    var a = Math.log(tail) / Math.log(LIFETIME_WEEKS);
+    return week1 * Math.pow(Math.min(weeks, LIFETIME_WEEKS), a);
+  }
 
   // Steam's tiers run from the first dollar earned, so a launch window's cut
   // is just steamCut() of its own gross.
@@ -857,24 +874,35 @@ tbody tr.total td.val { font-size: 15px; }
   function model(v) {
     var firstWeek  = v.wl * v.conv * v.organic;
     var lifetime   = firstWeek * v.tail;
-    var firstMonth = Math.min(firstWeek * MONTH_MULT, lifetime);
+    var firstMonth = cumulative(firstWeek, v.tail, 4);
+    var firstYear  = cumulative(firstWeek, v.tail, 52);
 
-    var paidFor     = 1 - v.ref;
-    var kept        = lifetime * paidFor;
-    var effPrice    = v.price * (1 - v.reg);
-    var launchPrice = v.price * (1 - v.reg * LAUNCH_SHARE);
+    var paidFor  = 1 - v.ref;
+    // Erosion ramps with how much of the lifetime has sold: half of it at
+    // launch, all of it by the end, so every milestone prices between the two.
+    function grossAt(u) {
+      var share = lifetime > 0 ? Math.min(u / lifetime, 1) : 1;
+      var price = v.price * (1 - v.reg * (LAUNCH_SHARE + (1 - LAUNCH_SHARE) * share));
+      return u * paidFor * price;
+    }
 
-    // Windows are clamped so a short tail can never make a slice out-earn the whole.
-    var life  = payout(kept * effPrice, v.tax);
-    var month = payout(Math.min(firstMonth * paidFor * launchPrice, life.gross), v.tax);
-    var week  = payout(Math.min(firstWeek * paidFor * launchPrice, month.gross), v.tax);
+    // Clamped downward so no milestone can out-earn a later one.
+    var gLife  = grossAt(lifetime);
+    var gYear  = Math.min(grossAt(firstYear), gLife);
+    var gMonth = Math.min(grossAt(firstMonth), gYear);
+    var gWeek  = Math.min(grossAt(firstWeek), gMonth);
+
+    var year = payout(gYear, v.tax);
+    var life = payout(gLife, v.tax);
 
     return {
-      firstWeek: firstWeek, firstMonth: firstMonth, lifetime: lifetime,
-      kept: kept, effPrice: effPrice, launchPrice: launchPrice,
-      gross: life.gross, cut: life.cut, net: life.net,
-      withheld: life.withheld, take: life.take,
-      weekTake: week.take, monthTake: month.take
+      firstWeek: firstWeek, firstMonth: firstMonth,
+      firstYear: firstYear, lifetime: lifetime,
+      gross: year.gross, cut: year.cut, net: year.net,
+      withheld: year.withheld, take: year.take,
+      weekTake: payout(gWeek, v.tax).take,
+      monthTake: payout(gMonth, v.tax).take,
+      lifeTake: life.take
     };
   }
 
@@ -914,18 +942,24 @@ tbody tr.total td.val { font-size: 15px; }
 
     $("o-fw").textContent = units(m.firstWeek);
     $("o-mo").textContent = units(m.firstMonth);
+    $("o-yr").textContent = units(m.firstYear);
     $("o-lt").textContent = units(m.lifetime);
     $("o-fw-rev").textContent = usd(m.weekTake);
     $("o-mo-rev").textContent = usd(m.monthTake);
-    $("o-lt-rev").textContent = usd(m.take);
+    $("o-yr-rev").textContent = usd(m.take);
+    $("o-lt-rev").textContent = usd(m.lifeTake);
     $("o-fw-alt").textContent = fx(m.weekTake);
     $("o-mo-alt").textContent = fx(m.monthTake);
-    $("o-lt-alt").textContent = fx(m.take);
+    $("o-yr-alt").textContent = fx(m.take);
+    $("o-lt-alt").textContent = fx(m.lifeTake);
 
-    var perCopy = m.kept > 0 ? m.take / m.kept : 0;
-    $("o-eff").textContent = "$" + m.effPrice.toFixed(2);
+    // Both tiles describe the first year, like everything else in the panel.
+    var yearPaid = m.firstYear * (1 - v.ref);
+    var perCopy  = yearPaid > 0 ? m.take / yearPaid : 0;
+    var avgPrice = yearPaid > 0 ? m.gross / yearPaid : 0;
+    $("o-eff").textContent = "$" + avgPrice.toFixed(2);
     $("o-per").textContent = "$" + perCopy.toFixed(2);
-    $("o-eff-alt").textContent = fx(m.effPrice, 2) + " " + code;
+    $("o-eff-alt").textContent = fx(avgPrice, 2) + " " + code;
     $("o-per-alt").textContent = fx(perCopy, 2) + " " + code;
 
     $("o-gross").textContent = usdExact(m.gross);
@@ -1055,10 +1089,12 @@ tbody tr.total td.val { font-size: 15px; }
     var lines = [
       "Steam revenue estimate",
       "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " + pct(v.conv * 100) + " week-one conversion",
-      "Launch week: " + units(m.firstWeek) + " units · " + usdExact(m.weekTake) + " take-home",
+      "First week: " + units(m.firstWeek) + " units · " + usdExact(m.weekTake) + " take-home",
       "First month: " + units(m.firstMonth) + " units · " + usdExact(m.monthTake) + " take-home",
-      "Lifetime: " + units(m.lifetime) + " units at $" + m.effPrice.toFixed(2) + " average",
-      "Gross: " + usdExact(m.gross),
+      "First year: " + units(m.firstYear) + " units · " + usdExact(m.take) + " take-home",
+      "Lifetime: " + units(m.lifetime) + " units · " + usdExact(m.lifeTake) + " take-home",
+      "",
+      "First year — gross: " + usdExact(m.gross),
       "Steam's cut: -" + usdExact(m.cut),
       "Withholding (" + pct(v.tax * 100) + "): -" + usdExact(m.withheld),
       "Take-home: " + usdExact(m.take),
