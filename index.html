@@ -356,26 +356,30 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   font-variant-numeric: tabular-nums;
   margin-top: 3px;
 }
+.kpi .c {
+  font-family: var(--f-data);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { padding: 7px 0; text-align: left; }
 th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
-td:last-child, th:last-child { text-align: right; font-family: var(--f-data); font-variant-numeric: tabular-nums; }
+th + th, td + td { text-align: right; padding-left: 12px; }
+td + td { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
 tbody td { border-bottom: 1px solid var(--line-soft); color: var(--text-dim); }
-tbody td:last-child { color: var(--text); }
-tbody tr.minus td:last-child { color: var(--accent); }
+tbody td.val { color: var(--text); }
+tbody tr.minus td.val { color: var(--accent); }
+tbody td.cur { color: var(--text-faint); }
 tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color: var(--text); }
-tbody tr.total td:last-child { font-size: 15px; }
+tbody tr.total td.val { font-size: 15px; }
 
 .scenarios { margin-top: 22px; }
-.timeline { margin-top: 20px; }
-.t3 th:first-child { width: 42%; }
-.t3 th + th { text-align: right; }
-.t3 td + td {
-  text-align: right;
-  font-family: var(--f-data);
-  font-variant-numeric: tabular-nums;
-}
+.timeline { margin-top: 6px; }
+.timeline th:first-child { width: 34%; }
+.sub-label { margin-top: 22px; color: var(--text-faint); }
 
 .tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
 .btn {
@@ -493,6 +497,8 @@ tbody tr.total td:last-child { font-size: 15px; }
 }
 @media (max-width: 380px) {
   .kpis { grid-template-columns: 1fr; }
+  table { font-size: 12.5px; }
+  th + th, td + td { padding-left: 8px; }
   .pair { grid-template-columns: 1fr; }
 }
 
@@ -629,38 +635,48 @@ tbody tr.total td:last-child { font-size: 15px; }
         <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
       </div>
 
-      <table class="t3 timeline">
-        <thead><tr><th scope="col">Window</th><th scope="col">Units</th><th scope="col">Take-home</th></tr></thead>
+      <div class="eyebrow sub-label">Take-home by window</div>
+      <table class="timeline">
+        <thead><tr>
+          <th scope="col">Window</th><th scope="col">Units</th>
+          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
+        </tr></thead>
         <tbody>
-          <tr><td>Launch week</td><td id="o-fw">—</td><td id="o-fw-rev">—</td></tr>
-          <tr><td>First month</td><td id="o-mo">—</td><td id="o-mo-rev">—</td></tr>
-          <tr class="total"><td>Lifetime</td><td id="o-lt">—</td><td id="o-lt-rev">—</td></tr>
+          <tr><td>Launch week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
+          <tr><td>First month</td><td id="o-mo">—</td><td class="val" id="o-mo-rev">—</td><td class="cur" id="o-mo-alt">—</td></tr>
+          <tr class="total"><td>Lifetime</td><td id="o-lt">—</td><td class="val" id="o-lt-rev">—</td><td class="cur" id="o-lt-alt">—</td></tr>
         </tbody>
       </table>
 
       <div class="kpis">
-        <div class="kpi"><div class="k">Avg. sale price</div><div class="v" id="o-eff">—</div></div>
-        <div class="kpi"><div class="k">You keep per copy</div><div class="v" id="o-per">—</div></div>
+        <div class="kpi"><div class="k">Avg. sale price</div><div class="v" id="o-eff">—</div><div class="c" id="o-eff-alt">—</div></div>
+        <div class="kpi"><div class="k">You keep per copy</div><div class="v" id="o-per">—</div><div class="c" id="o-per-alt">—</div></div>
       </div>
 
       <table>
-        <thead><tr><th scope="col">Lifetime breakdown</th><th scope="col">USD</th></tr></thead>
+        <thead><tr>
+          <th scope="col">Lifetime breakdown</th>
+          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
+        </tr></thead>
         <tbody>
-          <tr><td>Gross store revenue</td><td id="o-gross">—</td></tr>
-          <tr class="minus"><td id="l-steam">Steam's cut</td><td id="o-cut">—</td></tr>
-          <tr><td>Net revenue from Valve</td><td id="o-net">—</td></tr>
-          <tr class="minus"><td id="l-wh">Withholding tax</td><td id="o-wh">—</td></tr>
-          <tr class="total"><td>Your take-home</td><td id="o-take2">—</td></tr>
+          <tr><td>Gross store revenue</td><td class="val" id="o-gross">—</td><td class="cur" id="o-gross-alt">—</td></tr>
+          <tr class="minus"><td id="l-steam">Steam's cut</td><td class="val" id="o-cut">—</td><td class="cur" id="o-cut-alt">—</td></tr>
+          <tr><td>Net revenue from Valve</td><td class="val" id="o-net">—</td><td class="cur" id="o-net-alt">—</td></tr>
+          <tr class="minus"><td id="l-wh">Withholding tax</td><td class="val" id="o-wh">—</td><td class="cur" id="o-wh-alt">—</td></tr>
+          <tr class="total"><td>Your take-home</td><td class="val" id="o-take2">—</td><td class="cur" id="o-take2-alt">—</td></tr>
         </tbody>
       </table>
 
       <div class="scenarios">
         <table>
-          <thead><tr><th scope="col">If it goes…</th><th scope="col">Take-home</th></tr></thead>
+          <thead><tr>
+            <th scope="col">If it goes…</th>
+            <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
+          </tr></thead>
           <tbody>
-            <tr><td>Worse than planned</td><td id="o-low">—</td></tr>
-            <tr><td>To plan</td><td id="o-base">—</td></tr>
-            <tr><td>Better than planned</td><td id="o-high">—</td></tr>
+            <tr><td>Worse than planned</td><td class="val" id="o-low">—</td><td class="cur" id="o-low-alt">—</td></tr>
+            <tr><td>To plan</td><td class="val" id="o-base">—</td><td class="cur" id="o-base-alt">—</td></tr>
+            <tr><td>Better than planned</td><td class="val" id="o-high">—</td><td class="cur" id="o-high-alt">—</td></tr>
           </tbody>
         </table>
       </div>
@@ -787,6 +803,21 @@ tbody tr.total td:last-child { font-size: 15px; }
   function units(n) { return Math.round(n).toLocaleString("en-US"); }
   function pct(n) { return (Math.round(n * 10) / 10) + "%"; }
 
+  // ── the second currency ──
+  function fxRate() {
+    var r = parseFloat(el.rate.value);
+    return isFinite(r) && r > 0 ? r : 0;
+  }
+  // dp: decimals — 0 for totals, 2 for per-copy figures.
+  function fx(n, dp) {
+    var r = fxRate();
+    if (!r) return "—";
+    dp = dp || 0;
+    var sign = n < 0 ? "−" : "";
+    return sign + Math.abs(n * r).toLocaleString("en-US",
+      { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  }
+
   // ── Steam's tiered revenue share ──
   function steamCut(gross) {
     var t1 = Math.min(gross, 1e7);
@@ -864,10 +895,10 @@ tbody tr.total td:last-child { font-size: 15px; }
     $("o-take2").textContent = usdExact(m.take);
 
     var code = el.cur.value;
-    var rate = parseFloat(el.rate.value);
-    $("o-take-alt").textContent = isFinite(rate) && rate > 0
-      ? (m.take * rate).toLocaleString("en-US", { maximumFractionDigits: 0 }) + " " + code
-      : "—";
+    $("o-take-alt").textContent = fxRate() ? fx(m.take) + " " + code : "—";
+    Array.prototype.forEach.call(document.querySelectorAll(".h-cur"), function (th) {
+      th.textContent = code;
+    });
 
     var g = m.gross || 1;
     var pCut = m.cut / g * 100, pTax = m.withheld / g * 100, pTake = m.take / g * 100;
@@ -887,13 +918,25 @@ tbody tr.total td:last-child { font-size: 15px; }
     $("o-fw-rev").textContent = usd(m.weekTake);
     $("o-mo-rev").textContent = usd(m.monthTake);
     $("o-lt-rev").textContent = usd(m.take);
+    $("o-fw-alt").textContent = fx(m.weekTake);
+    $("o-mo-alt").textContent = fx(m.monthTake);
+    $("o-lt-alt").textContent = fx(m.take);
+
+    var perCopy = m.kept > 0 ? m.take / m.kept : 0;
     $("o-eff").textContent = "$" + m.effPrice.toFixed(2);
-    $("o-per").textContent = "$" + (m.kept > 0 ? (m.take / m.kept).toFixed(2) : "0.00");
+    $("o-per").textContent = "$" + perCopy.toFixed(2);
+    $("o-eff-alt").textContent = fx(m.effPrice, 2) + " " + code;
+    $("o-per-alt").textContent = fx(perCopy, 2) + " " + code;
 
     $("o-gross").textContent = usdExact(m.gross);
     $("o-cut").textContent   = "−" + usdExact(m.cut);
     $("o-net").textContent   = usdExact(m.net);
     $("o-wh").textContent    = "−" + usdExact(m.withheld);
+    $("o-gross-alt").textContent = fx(m.gross);
+    $("o-cut-alt").textContent   = "−" + fx(m.cut);
+    $("o-net-alt").textContent   = fx(m.net);
+    $("o-wh-alt").textContent    = "−" + fx(m.withheld);
+    $("o-take2-alt").textContent = fx(m.take);
     $("l-steam").textContent = "Steam's cut (" + pct(m.gross > 0 ? m.cut / m.gross * 100 : 30) + ")";
     $("l-wh").textContent    = "Withholding tax (" + pct(v.tax * 100) + ")";
 
@@ -903,9 +946,13 @@ tbody tr.total td:last-child { font-size: 15px; }
       s.conv = v.conv * cm; s.tail = v.tail * tm; s.organic = v.organic * rm;
       return model(s).take;
     }
-    $("o-low").textContent  = usd(scen(0.55, 0.6, 0.85));
+    var low = scen(0.55, 0.6, 0.85), high = scen(1.5, 1.6, 1.2);
+    $("o-low").textContent  = usd(low);
     $("o-base").textContent = usd(m.take);
-    $("o-high").textContent = usd(scen(1.5, 1.6, 1.2));
+    $("o-high").textContent = usd(high);
+    $("o-low-alt").textContent  = fx(low);
+    $("o-base-alt").textContent = fx(m.take);
+    $("o-high-alt").textContent = fx(high);
 
     save();
   }
