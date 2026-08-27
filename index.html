@@ -624,12 +624,10 @@ tbody tr.total td {
       <fieldset>
         <legend>The game</legend>
 
-        <div class="row num">
+        <div class="row">
           <label for="s-price">Store price</label>
-          <div class="field">
-            <span class="pre" aria-hidden="true">$</span>
-            <input type="number" id="s-price" min="0" max="999.99" step="1" value="9.99" />
-          </div>
+          <output id="v-price" for="s-price">$9.99</output>
+          <input type="range" id="s-price" min="0.99" max="79.99" step="1" value="9.99" />
         </div>
 
         <div class="row num">
@@ -991,6 +989,7 @@ tbody tr.total td {
     var m = model(v);
     var code = el.cur.value;
 
+    $("v-price").textContent   = "$" + v.price.toFixed(2);
     $("v-conv").textContent    = pct(v.conv * 100);
     $("v-organic").textContent = v.organic.toFixed(1) + "×";
     $("v-tail").textContent    = v.tail.toFixed(1) + "×";
