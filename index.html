@@ -344,12 +344,6 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   font-variant-numeric: tabular-nums;
   color: var(--text-dim);
 }
-.kpi .c {
-  font-family: var(--f-data);
-  font-size: 11.5px;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-faint);
-}
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { padding: 8px 0; text-align: left; }
@@ -735,11 +729,11 @@ tbody tr.total td {
       <div class="kpis">
         <div class="kpi">
           <div class="k">Avg. sale price</div>
-          <div class="v" id="o-eff">—</div><div class="c" id="o-eff-u">USD</div>
+          <div class="v" id="o-eff">—</div>
         </div>
         <div class="kpi">
           <div class="k">You keep per copy</div>
-          <div class="v" id="o-per">—</div><div class="c" id="o-per-u">USD</div>
+          <div class="v" id="o-per">—</div>
         </div>
       </div>
 
@@ -824,16 +818,25 @@ tbody tr.total td {
 (function () {
   "use strict";
 
-  // ── currency table (rates are per 1 USD, approximate — user-editable) ──
+  // ── currencies: code, name, units per USD (approximate, editable), symbol ──
   var CURRENCIES = [
-    ["EUR", "Euro", 0.92],       ["GBP", "British pound", 0.79],
-    ["JOD", "Jordanian dinar", 0.709], ["CAD", "Canadian dollar", 1.37],
-    ["AUD", "Australian dollar", 1.52], ["JPY", "Japanese yen", 152],
-    ["INR", "Indian rupee", 84],  ["BRL", "Brazilian real", 5.6],
-    ["PLN", "Polish złoty", 4.0], ["SEK", "Swedish krona", 10.6],
-    ["TRY", "Turkish lira", 34],  ["AED", "UAE dirham", 3.67],
-    ["CNY", "Chinese yuan", 7.2], ["EGP", "Egyptian pound", 48]
+    ["EUR", "Euro", 0.92, "€"],
+    ["GBP", "British pound", 0.79, "£"],
+    ["JOD", "Jordanian dinar", 0.709, "JD"],
+    ["CAD", "Canadian dollar", 1.37, "C$"],
+    ["AUD", "Australian dollar", 1.52, "A$"],
+    ["JPY", "Japanese yen", 152, "¥"],
+    ["INR", "Indian rupee", 84, "₹"],
+    ["BRL", "Brazilian real", 5.6, "R$"],
+    ["PLN", "Polish złoty", 4.0, "zł"],
+    ["SEK", "Swedish krona", 10.6, "kr"],
+    ["TRY", "Turkish lira", 34, "₺"],
+    ["AED", "UAE dirham", 3.67, "AED"],
+    ["CNY", "Chinese yuan", 7.2, "CN¥"],
+    ["EGP", "Egyptian pound", 48, "E£"]
   ];
+  var SYMBOLS = { USD: "$" };
+  CURRENCIES.forEach(function (c) { SYMBOLS[c[0]] = c[3]; });
 
   var PRESETS = {
     impulse: { price: 4.99,  wl: 6000,   conv: 15, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
@@ -870,21 +873,27 @@ tbody tr.total td {
     return isFinite(r) && r > 0 ? r : 0;
   }
   function unitCode() { return showAlt ? el.cur.value : "USD"; }
+  // A symbol ending in a letter (JD, AED, kr) needs air before the digits;
+  // a glyph like $ or € does not.
+  function unitSymbol() {
+    var u = SYMBOLS[unitCode()] || unitCode();
+    return /[a-zà-ɏ]$/i.test(u) ? u + " " : u;
+  }
   function inUnit(n) { return showAlt ? n * fxRate() : n; }
   function usable() { return !showAlt || fxRate() > 0; }
 
   function money(n) {
     if (!usable()) return "—";
-    var x = inUnit(n), a = Math.abs(x);
-    if (a >= 1e6) return (x / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, "") + "M";
-    if (a >= 1e5) return Math.round(x / 1e3) + "k";
-    return Math.round(x).toLocaleString("en-US");
+    var u = unitSymbol(), x = inUnit(n), a = Math.abs(x);
+    if (a >= 1e6) return u + (x / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, "") + "M";
+    if (a >= 1e5) return u + Math.round(x / 1e3) + "k";
+    return u + Math.round(x).toLocaleString("en-US");
   }
   function moneyExact(n) {
-    return usable() ? Math.round(inUnit(n)).toLocaleString("en-US") : "—";
+    return usable() ? unitSymbol() + Math.round(inUnit(n)).toLocaleString("en-US") : "—";
   }
   function money2(n) {
-    return usable() ? inUnit(n).toFixed(2) : "—";
+    return usable() ? unitSymbol() + inUnit(n).toFixed(2) : "—";
   }
   function units(n) { return Math.round(n).toLocaleString("en-US"); }
   function pct(n) { return (Math.round(n * 10) / 10) + "%"; }
@@ -1011,12 +1020,10 @@ tbody tr.total td {
     var paid = y.paidUnits;
     $("o-eff").textContent = paid > 0 ? money2(y.gross / paid) : "—";
     $("o-per").textContent = paid > 0 ? money2(y.take / paid) : "—";
-    $("o-eff-u").textContent = unitCode();
-    $("o-per-u").textContent = unitCode();
-
-    $("t-take").textContent = money(y.take) + " " + unitCode();
+    $("t-take").textContent = money(y.take);
     // A short live region: dragging a slider announces the headline, not all 15 cells.
     $("live").textContent = "First-year take-home " + moneyExact(y.take) + " " + unitCode();
+
 
     save();
   }
@@ -1127,10 +1134,10 @@ tbody tr.total td {
   }
 
   $("btn-copy").addEventListener("click", function () {
-    var v = read(), m = model(v), u = " " + unitCode();
+    var v = read(), m = model(v);
     function block(name, w) {
       return name + ": " + units(w.units) + " units · gross " + moneyExact(w.gross) +
-             u + " · take-home " + moneyExact(w.take) + u;
+             " · take-home " + moneyExact(w.take);
     }
     var lines = [
       "Steam revenue estimate",
@@ -1141,7 +1148,8 @@ tbody tr.total td {
       block("First month", m.month),
       block("First year", m.year),
       "",
-      "Steam's cut and " + pct(v.tax * 100) + " withholding already deducted.",
+      "All figures in " + unitCode() + ", with Steam's cut and " +
+        pct(v.tax * 100) + " withholding already deducted.",
       "Estimated with the Kolide Studio Steam Revenue Estimator — kolidestudio.com"
     ];
     toClipboard(lines.join("\n"), this, "Copied");
