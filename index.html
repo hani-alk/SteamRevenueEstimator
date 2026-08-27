@@ -191,11 +191,11 @@ h1 em { font-style: normal; color: var(--accent); }
 .ticker .k { color: var(--text-faint); }
 .ticker .v {
   font-family: var(--f-display);
-  font-size: 26px;
+  font-size: 21px;
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* ── layout ─────────────────────────────────────────────────────────── */
@@ -235,6 +235,31 @@ legend {
   color: var(--text);
 }
 .row input[type="range"] { grid-column: 1 / -1; }
+.row .tip { grid-column: 1 / -1; font-size: 11.5px; color: var(--text-faint); margin-top: -5px; }
+.row.num { grid-template-columns: 1fr 132px; align-items: center; gap: 14px; }
+.field {
+  display: flex;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+.field:focus-within { border-color: var(--accent); }
+.field .pre {
+  padding-left: 10px;
+  font-family: var(--f-data);
+  font-size: 14px;
+  color: var(--text-faint);
+}
+.field input[type="number"] {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  text-align: right;
+  padding: 8px 10px;
+}
+.field input[type="number"]:focus-visible { outline: 0; }
 
 input[type="range"] {
   -webkit-appearance: none;
@@ -351,33 +376,91 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
 }
 
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-th, td { padding: 7px 0; text-align: left; }
-th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
-th + th, td + td { text-align: right; padding-left: 12px; }
-td + td { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-tbody td { border-bottom: 1px solid var(--line-soft); color: var(--text-dim); }
-tbody td.val { color: var(--text); }
-tbody tr.minus td.val { color: var(--accent); }
-tbody td.cur { color: var(--text-faint); }
-tbody tr.total td { border-bottom: 0; padding-top: 11px; font-weight: 700; color: var(--text); }
-tbody tr.total td.val { font-size: 15px; }
-
-.scenarios { margin-top: 22px; }
-.timeline { margin-top: 6px; }
-.timeline th:first-child { width: 34%; }
-.timeline tbody td { padding: 11px 0; }
-.timeline tbody td.val {
+th, td { padding: 8px 0; text-align: left; }
+thead th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 9px; }
+thead th:first-child { width: 31%; }
+thead th + th, tbody td { text-align: right; padding-left: 12px; }
+tbody th {
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--line-soft);
+}
+tbody td {
+  font-family: var(--f-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  border-bottom: 1px solid var(--line-soft);
+}
+/* Deductions read as deductions by their minus sign, not by colour — red is
+   reserved for money you keep, in the table and in the bar alike. */
+tbody tr.minus td { color: var(--text-dim); }
+tbody tr.total th, tbody tr.total td { border-bottom: 0; padding-top: 13px; }
+tbody tr.total th { color: var(--text); font-weight: 600; }
+tbody tr.total td {
   font-family: var(--f-display);
-  font-size: 21px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: -0.01em;
-  color: var(--text);
+  color: var(--accent);
 }
-.timeline tbody td:first-child { color: var(--text); }
-.timeline tbody td.cur { font-size: 12.5px; }
 
-.tools { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+/* ── panel head: label + the currency the whole panel is counted in ── */
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.units {
+  display: flex;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  flex: none;
+}
+.unit {
+  font-family: var(--f-display);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 11px;
+  border: 0;
+  background: transparent;
+  color: var(--text-faint);
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+.unit:hover { color: var(--text); }
+.unit[aria-pressed="true"] { background: var(--text); color: var(--ground); }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; }
+.btn-quiet {
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 6px;
+  background: none;
+  border: 0;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+.btn-quiet:hover { color: var(--accent); }
 .btn {
   font: inherit;
   font-size: 13px;
@@ -494,7 +577,9 @@ tbody tr.total td.val { font-size: 15px; }
 @media (max-width: 380px) {
   .kpis { grid-template-columns: 1fr; }
   table { font-size: 12.5px; }
-  th + th, td + td { padding-left: 8px; }
+  thead th + th, tbody td { padding-left: 8px; }
+  tbody th { font-size: 12.5px; }
+  tbody tr.total td { font-size: 17px; }
   .pair { grid-template-columns: 1fr; }
 }
 
@@ -509,7 +594,7 @@ tbody tr.total td.val { font-size: 15px; }
 
   <header class="mast">
     <div>
-      <h1>Steam Revenue<br /><em>Estimator</em></h1>
+      <h1>Steam Revenue <em>Estimator</em></h1>
     </div>
     <div class="byline">
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
@@ -527,7 +612,7 @@ tbody tr.total td.val { font-size: 15px; }
   </div>
 
   <div class="ticker" aria-hidden="true">
-    <span class="k eyebrow">In your pocket</span>
+    <span class="k eyebrow">First-year take-home</span>
     <span class="v" id="t-take">—</span>
   </div>
 
@@ -539,16 +624,19 @@ tbody tr.total td.val { font-size: 15px; }
       <fieldset>
         <legend>The game</legend>
 
-        <div class="row">
+        <div class="row num">
           <label for="s-price">Store price</label>
-          <output id="v-price" for="s-price">$9.99</output>
-          <input type="range" id="s-price" min="0.99" max="79.99" step="1" value="9.99" />
+          <div class="field">
+            <span class="pre" aria-hidden="true">$</span>
+            <input type="number" id="s-price" min="0" max="999.99" step="1" value="9.99" />
+          </div>
         </div>
 
-        <div class="row">
+        <div class="row num">
           <label for="s-wl">Wishlists at launch</label>
-          <output id="v-wl" for="s-wl">10,000</output>
-          <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" />
+          <div class="field">
+            <input type="number" id="s-wl" min="0" max="100000000" step="500" value="10000" />
+          </div>
         </div>
       </fieldset>
 
@@ -559,18 +647,21 @@ tbody tr.total td.val { font-size: 15px; }
           <label for="s-conv">Week-one conversion</label>
           <output id="v-conv" for="s-conv">12%</output>
           <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" />
+          <div class="tip">Of your wishlists. Typical 8–20%.</div>
         </div>
 
         <div class="row">
-          <label for="s-organic">Organic multiplier</label>
+          <label for="s-organic">Word of mouth</label>
           <output id="v-organic" for="s-organic">1.4×</output>
           <input type="range" id="s-organic" min="1" max="4" step="0.1" value="1.4" />
+          <div class="tip">1.0× = wishlist owners only.</div>
         </div>
 
         <div class="row">
-          <label for="s-tail">First-year multiplier</label>
+          <label for="s-tail">Year-one sales</label>
           <output id="v-tail" for="s-tail">2.5×</output>
           <input type="range" id="s-tail" min="1" max="15" step="0.5" value="2.5" />
+          <div class="tip">× the first week.</div>
         </div>
       </fieldset>
 
@@ -578,15 +669,17 @@ tbody tr.total td.val { font-size: 15px; }
         <legend>Price erosion</legend>
 
         <div class="row">
-          <label for="s-reg">Regional pricing + discounts</label>
+          <label for="s-reg">Discounts + regional pricing</label>
           <output id="v-reg" for="s-reg">25%</output>
           <input type="range" id="s-reg" min="0" max="60" step="1" value="25" />
+          <div class="tip">Average off list price.</div>
         </div>
 
         <div class="row">
           <label for="s-ref">Refund rate</label>
           <output id="v-ref" for="s-ref">8%</output>
           <input type="range" id="s-ref" min="0" max="25" step="0.5" value="8" />
+          <div class="tip">Steam average 5–10%.</div>
         </div>
       </fieldset>
 
@@ -612,21 +705,49 @@ tbody tr.total td.val { font-size: 15px; }
     </form>
 
     <!-- ── results ── -->
-    <aside class="panel" aria-live="polite">
-      <div class="eyebrow">Take-home by milestone</div>
-      <table class="timeline">
+    <aside class="panel">
+      <p class="sr-only" aria-live="polite" id="live"></p>
+
+      <div class="panel-head">
+        <span class="eyebrow">What you take home</span>
+        <span class="units" role="group" aria-label="Show figures in">
+          <button class="unit" type="button" id="cur-usd" aria-pressed="true">USD</button>
+          <button class="unit" type="button" id="cur-alt" aria-pressed="false">EUR</button>
+        </span>
+      </div>
+
+      <table>
         <thead><tr>
-          <th scope="col">Milestone</th><th scope="col">Units</th>
-          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
+          <th scope="col"><span class="sr-only">Line</span></th>
+          <th scope="col">First week</th>
+          <th scope="col">First month</th>
+          <th scope="col">First year</th>
         </tr></thead>
         <tbody>
-          <tr><td>First week</td><td id="o-fw">—</td><td class="val" id="o-fw-rev">—</td><td class="cur" id="o-fw-alt">—</td></tr>
-          <tr><td>First month</td><td id="o-mo">—</td><td class="val" id="o-mo-rev">—</td><td class="cur" id="o-mo-alt">—</td></tr>
-          <tr><td>First year</td><td id="o-yr">—</td><td class="val" id="o-yr-rev">—</td><td class="cur" id="o-yr-alt">—</td></tr>
+          <tr>
+            <th scope="row">Units sold</th>
+            <td id="n-wk">—</td><td id="n-mo">—</td><td id="n-yr">—</td>
+          </tr>
+          <tr>
+            <th scope="row">Gross revenue</th>
+            <td id="g-wk">—</td><td id="g-mo">—</td><td id="g-yr">—</td>
+          </tr>
+          <tr class="minus">
+            <th scope="row" id="l-steam">Steam's cut</th>
+            <td id="c-wk">—</td><td id="c-mo">—</td><td id="c-yr">—</td>
+          </tr>
+          <tr class="minus">
+            <th scope="row" id="l-wh">Withholding</th>
+            <td id="w-wk">—</td><td id="w-mo">—</td><td id="w-yr">—</td>
+          </tr>
+          <tr class="total">
+            <th scope="row">Take-home</th>
+            <td id="t-wk">—</td><td id="t-mo">—</td><td id="t-yr">—</td>
+          </tr>
         </tbody>
       </table>
 
-      <div class="bar" id="bar" role="img" aria-label="Split of gross store revenue">
+      <div class="bar" id="bar" role="img" aria-label="Split of first-year gross revenue">
         <span class="seg-cut"  id="seg-cut"  style="flex: 0 0 30%"></span>
         <span class="seg-tax"  id="seg-tax"  style="flex: 0 0 21%"></span>
         <span class="seg-take" id="seg-take" style="flex: 0 0 49%"></span>
@@ -638,42 +759,20 @@ tbody tr.total td.val { font-size: 15px; }
       </div>
 
       <div class="kpis">
-        <div class="kpi"><div class="k">Avg. sale price</div><div class="v" id="o-eff">—</div><div class="c" id="o-eff-alt">—</div></div>
-        <div class="kpi"><div class="k">You keep per copy</div><div class="v" id="o-per">—</div><div class="c" id="o-per-alt">—</div></div>
-      </div>
-
-      <table>
-        <thead><tr>
-          <th scope="col">First-year breakdown</th>
-          <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
-        </tr></thead>
-        <tbody>
-          <tr><td>Gross store revenue</td><td class="val" id="o-gross">—</td><td class="cur" id="o-gross-alt">—</td></tr>
-          <tr class="minus"><td id="l-steam">Steam's cut</td><td class="val" id="o-cut">—</td><td class="cur" id="o-cut-alt">—</td></tr>
-          <tr><td>Net revenue from Valve</td><td class="val" id="o-net">—</td><td class="cur" id="o-net-alt">—</td></tr>
-          <tr class="minus"><td id="l-wh">Withholding tax</td><td class="val" id="o-wh">—</td><td class="cur" id="o-wh-alt">—</td></tr>
-          <tr class="total"><td>Your take-home</td><td class="val" id="o-take2">—</td><td class="cur" id="o-take2-alt">—</td></tr>
-        </tbody>
-      </table>
-
-      <div class="scenarios">
-        <table>
-          <thead><tr>
-            <th scope="col">If it goes…</th>
-            <th scope="col">USD</th><th scope="col" class="h-cur">EUR</th>
-          </tr></thead>
-          <tbody>
-            <tr><td>Worse than planned</td><td class="val" id="o-low">—</td><td class="cur" id="o-low-alt">—</td></tr>
-            <tr><td>To plan</td><td class="val" id="o-base">—</td><td class="cur" id="o-base-alt">—</td></tr>
-            <tr><td>Better than planned</td><td class="val" id="o-high">—</td><td class="cur" id="o-high-alt">—</td></tr>
-          </tbody>
-        </table>
+        <div class="kpi">
+          <div class="k">Avg. sale price</div>
+          <div class="v" id="o-eff">—</div><div class="c" id="o-eff-u">USD</div>
+        </div>
+        <div class="kpi">
+          <div class="k">You keep per copy</div>
+          <div class="v" id="o-per">—</div><div class="c" id="o-per-u">USD</div>
+        </div>
       </div>
 
       <div class="tools">
         <button class="btn" type="button" id="btn-copy">Copy summary</button>
         <button class="btn" type="button" id="btn-link">Copy link</button>
-        <button class="btn" type="button" id="btn-reset">Reset</button>
+        <button class="btn-quiet" type="button" id="btn-reset">Reset</button>
       </div>
     </aside>
   </div>
@@ -681,14 +780,14 @@ tbody tr.total td.val { font-size: 15px; }
   <details class="notes">
     <summary>How it's calculated</summary>
     <ol class="steps">
-      <li><b>Launch-week units</b>
-        <code>wishlists × conversion × organic</code></li>
+      <li><b>First-week units</b>
+        <code>wishlists × conversion × word of mouth</code></li>
       <li><b>First-year units</b>
-        <code>first week × first-year multiplier</code>
+        <code>first week × year-one sales</code>
         <span>A 2.5× game sells one and a half times its opening week again over the
               following eleven months.</span></li>
       <li><b>First-month units</b>
-        <code>first week × 4 ^ (ln(first-year multiplier) ÷ ln 52)</code>
+        <code>first week × 4 ^ (ln(year-one sales) ÷ ln 52)</code>
         <span>Sales pile up on a power curve rather than a straight line, anchored so that
               week 52 lands exactly on the first-year figure. The month reads off the same
               curve, so nothing here depends on guessing how long the game sells for.</span></li>
@@ -776,42 +875,34 @@ tbody tr.total td.val { font-size: 15px; }
     tax: $("s-tax"), cur: $("s-cur"), rate: $("s-rate")
   };
 
-  // ── wishlist slider: log scale, 100 → 1,000,000 over 0–1000 ──
-  var WL_MIN = 100, WL_SPAN = 4; // decades
-  function posToWl(p) {
-    var raw = WL_MIN * Math.pow(10, (p / 1000) * WL_SPAN);
-    var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10) - 1);
-    return Math.max(WL_MIN, Math.round(raw / mag) * mag);
-  }
-  function wlToPos(w) {
-    return Math.round(1000 * Math.log(Math.max(WL_MIN, w) / WL_MIN) / Math.LN10 / WL_SPAN);
-  }
-
   // ── formatting ──
-  function usd(n) {
-    var a = Math.abs(n);
-    if (a >= 1e6) return "$" + (n / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, "") + "M";
-    if (a >= 1e5) return "$" + Math.round(n / 1e3) + "k";
-    return "$" + Math.round(n).toLocaleString("en-US");
-  }
-  function usdExact(n) { return "$" + Math.round(n).toLocaleString("en-US"); }
-  function units(n) { return Math.round(n).toLocaleString("en-US"); }
-  function pct(n) { return (Math.round(n * 10) / 10) + "%"; }
+  // The panel counts in one currency at a time; the toggle above the table is
+  // the unit label, so the figures themselves stay bare.
+  var showAlt = false;
 
-  // ── the second currency ──
   function fxRate() {
     var r = parseFloat(el.rate.value);
     return isFinite(r) && r > 0 ? r : 0;
   }
-  // dp: decimals — 0 for totals, 2 for per-copy figures.
-  function fx(n, dp) {
-    var r = fxRate();
-    if (!r) return "—";
-    dp = dp || 0;
-    var sign = n < 0 ? "−" : "";
-    return sign + Math.abs(n * r).toLocaleString("en-US",
-      { minimumFractionDigits: dp, maximumFractionDigits: dp });
+  function unitCode() { return showAlt ? el.cur.value : "USD"; }
+  function inUnit(n) { return showAlt ? n * fxRate() : n; }
+  function usable() { return !showAlt || fxRate() > 0; }
+
+  function money(n) {
+    if (!usable()) return "—";
+    var x = inUnit(n), a = Math.abs(x);
+    if (a >= 1e6) return (x / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, "") + "M";
+    if (a >= 1e5) return Math.round(x / 1e3) + "k";
+    return Math.round(x).toLocaleString("en-US");
   }
+  function moneyExact(n) {
+    return usable() ? Math.round(inUnit(n)).toLocaleString("en-US") : "—";
+  }
+  function money2(n) {
+    return usable() ? inUnit(n).toFixed(2) : "—";
+  }
+  function units(n) { return Math.round(n).toLocaleString("en-US"); }
+  function pct(n) { return (Math.round(n * 10) / 10) + "%"; }
 
   // ── Steam's tiered revenue share ──
   function steamCut(gross) {
@@ -821,10 +912,16 @@ tbody tr.total td.val { font-size: 15px; }
     return t1 * 0.30 + t2 * 0.25 + t3 * 0.20;
   }
 
+  // A half-typed or emptied field reads as zero rather than NaN.
+  function num(input) {
+    var x = parseFloat(input.value);
+    return isFinite(x) && x > 0 ? x : 0;
+  }
+
   function read() {
     return {
-      price:   parseFloat(el.price.value),
-      wl:      posToWl(parseInt(el.wl.value, 10)),
+      price:   num(el.price),
+      wl:      num(el.wl),
       conv:    parseFloat(el.conv.value) / 100,
       organic: parseFloat(el.organic.value),
       tail:    parseFloat(el.tail.value),
@@ -876,39 +973,50 @@ tbody tr.total td.val { font-size: 15px; }
     var gMonth = Math.min(grossAt(firstMonth), gYear);
     var gWeek  = Math.min(grossAt(firstWeek), gMonth);
 
-    var year = payout(gYear, v.tax);
-
+    function milestone(u, gross) {
+      var w = payout(gross, v.tax);
+      w.units = u;
+      w.paidUnits = u * paidFor;
+      return w;
+    }
     return {
-      firstWeek: firstWeek, firstMonth: firstMonth, firstYear: firstYear,
-      gross: year.gross, cut: year.cut, net: year.net,
-      withheld: year.withheld, take: year.take,
-      weekTake: payout(gWeek, v.tax).take,
-      monthTake: payout(gMonth, v.tax).take
+      week:  milestone(firstWeek, gWeek),
+      month: milestone(firstMonth, gMonth),
+      year:  milestone(firstYear, gYear)
     };
   }
 
   function render() {
     var v = read();
     var m = model(v);
+    var code = el.cur.value;
 
-    $("v-price").textContent   = "$" + v.price.toFixed(2);
-    $("v-wl").textContent      = units(v.wl);
     $("v-conv").textContent    = pct(v.conv * 100);
     $("v-organic").textContent = v.organic.toFixed(1) + "×";
     $("v-tail").textContent    = v.tail.toFixed(1) + "×";
     $("v-reg").textContent     = pct(v.reg * 100);
     $("v-ref").textContent     = pct(v.ref * 100);
+    $("cur-alt").textContent   = code;
 
-    $("t-take").textContent  = usd(m.take);
-    $("o-take2").textContent = usdExact(m.take);
-
-    var code = el.cur.value;
-    Array.prototype.forEach.call(document.querySelectorAll(".h-cur"), function (th) {
-      th.textContent = code;
+    // One column per milestone, one row per line of the breakdown, so every
+    // figure on the page appears exactly once.
+    [["wk", m.week], ["mo", m.month], ["yr", m.year]].forEach(function (col) {
+      var k = col[0], w = col[1];
+      $("n-" + k).textContent = units(w.units);
+      $("g-" + k).textContent = money(w.gross);
+      $("c-" + k).textContent = "−" + money(w.cut);
+      $("w-" + k).textContent = "−" + money(w.withheld);
+      $("t-" + k).textContent = money(w.take);
     });
 
-    var g = m.gross || 1;
-    var pCut = m.cut / g * 100, pTax = m.withheld / g * 100, pTake = m.take / g * 100;
+    var y = m.year;
+    $("l-steam").textContent = "Steam's cut (" +
+      pct(y.gross > 0 ? y.cut / y.gross * 100 : 30) + ")";
+    $("l-wh").textContent = "Withholding (" + pct(v.tax * 100) + ")";
+
+    // ── where the first year's money goes ──
+    var g = y.gross || 1;
+    var pCut = y.cut / g * 100, pTax = y.withheld / g * 100, pTake = y.take / g * 100;
     $("seg-cut").style.flex  = "0 0 " + pCut + "%";
     $("seg-tax").style.flex  = "0 0 " + pTax + "%";
     $("seg-take").style.flex = "0 0 " + pTake + "%";
@@ -916,53 +1024,18 @@ tbody tr.total td.val { font-size: 15px; }
     $("l-tax").textContent   = "Withheld " + pct(pTax);
     $("l-take").textContent  = "You " + pct(pTake);
     $("bar").setAttribute("aria-label",
-      "Of gross store revenue, Steam takes " + pct(pCut) + ", withholding takes " +
+      "Of first-year gross revenue, Steam takes " + pct(pCut) + ", withholding takes " +
       pct(pTax) + ", you keep " + pct(pTake) + ".");
 
-    $("o-fw").textContent = units(m.firstWeek);
-    $("o-mo").textContent = units(m.firstMonth);
-    $("o-yr").textContent = units(m.firstYear);
-    $("o-fw-rev").textContent = usd(m.weekTake);
-    $("o-mo-rev").textContent = usd(m.monthTake);
-    $("o-yr-rev").textContent = usd(m.take);
-    $("o-fw-alt").textContent = fx(m.weekTake);
-    $("o-mo-alt").textContent = fx(m.monthTake);
-    $("o-yr-alt").textContent = fx(m.take);
+    var paid = y.paidUnits;
+    $("o-eff").textContent = paid > 0 ? money2(y.gross / paid) : "—";
+    $("o-per").textContent = paid > 0 ? money2(y.take / paid) : "—";
+    $("o-eff-u").textContent = unitCode();
+    $("o-per-u").textContent = unitCode();
 
-    // Both tiles describe the first year, like everything else in the panel.
-    var yearPaid = m.firstYear * (1 - v.ref);
-    var perCopy  = yearPaid > 0 ? m.take / yearPaid : 0;
-    var avgPrice = yearPaid > 0 ? m.gross / yearPaid : 0;
-    $("o-eff").textContent = "$" + avgPrice.toFixed(2);
-    $("o-per").textContent = "$" + perCopy.toFixed(2);
-    $("o-eff-alt").textContent = fx(avgPrice, 2) + " " + code;
-    $("o-per-alt").textContent = fx(perCopy, 2) + " " + code;
-
-    $("o-gross").textContent = usdExact(m.gross);
-    $("o-cut").textContent   = "−" + usdExact(m.cut);
-    $("o-net").textContent   = usdExact(m.net);
-    $("o-wh").textContent    = "−" + usdExact(m.withheld);
-    $("o-gross-alt").textContent = fx(m.gross);
-    $("o-cut-alt").textContent   = "−" + fx(m.cut);
-    $("o-net-alt").textContent   = fx(m.net);
-    $("o-wh-alt").textContent    = "−" + fx(m.withheld);
-    $("o-take2-alt").textContent = fx(m.take);
-    $("l-steam").textContent = "Steam's cut (" + pct(m.gross > 0 ? m.cut / m.gross * 100 : 30) + ")";
-    $("l-wh").textContent    = "Withholding tax (" + pct(v.tax * 100) + ")";
-
-    // scenarios — conversion, tail and word of mouth move together, they usually do
-    function scen(cm, tm, rm) {
-      var s = Object.assign({}, v);
-      s.conv = v.conv * cm; s.tail = v.tail * tm; s.organic = v.organic * rm;
-      return model(s).take;
-    }
-    var low = scen(0.55, 0.6, 0.85), high = scen(1.5, 1.6, 1.2);
-    $("o-low").textContent  = usd(low);
-    $("o-base").textContent = usd(m.take);
-    $("o-high").textContent = usd(high);
-    $("o-low-alt").textContent  = fx(low);
-    $("o-base-alt").textContent = fx(m.take);
-    $("o-high-alt").textContent = fx(high);
+    $("t-take").textContent = money(y.take) + " " + unitCode();
+    // A short live region: dragging a slider announces the headline, not all 15 cells.
+    $("live").textContent = "First-year take-home " + moneyExact(y.take) + " " + unitCode();
 
     save();
   }
@@ -992,7 +1065,7 @@ tbody tr.total td.val { font-size: 15px; }
   function setPreset(name) {
     var p = PRESETS[name] || PRESETS.indie;
     el.price.value   = p.price;
-    el.wl.value      = wlToPos(p.wl);
+    el.wl.value      = p.wl;
     el.conv.value    = p.conv;
     el.organic.value = p.organic;
     el.tail.value    = p.tail;
@@ -1022,6 +1095,16 @@ tbody tr.total td.val { font-size: 15px; }
     el.rate.value = opt.dataset.rate;
     render();
   });
+
+  // ── which currency the panel counts in ──
+  function setUnit(alt) {
+    showAlt = !!alt;
+    $("cur-usd").setAttribute("aria-pressed", String(!showAlt));
+    $("cur-alt").setAttribute("aria-pressed", String(showAlt));
+    render();
+  }
+  $("cur-usd").addEventListener("click", function () { setUnit(false); });
+  $("cur-alt").addEventListener("click", function () { setUnit(true); });
 
   // ── wiring ──
   ["price", "wl", "conv", "organic", "tail", "reg", "ref"].forEach(function (k) {
@@ -1061,20 +1144,22 @@ tbody tr.total td.val { font-size: 15px; }
   }
 
   $("btn-copy").addEventListener("click", function () {
-    var v = read(), m = model(v);
+    var v = read(), m = model(v), u = " " + unitCode();
+    function block(name, w) {
+      return name + ": " + units(w.units) + " units · gross " + moneyExact(w.gross) +
+             u + " · take-home " + moneyExact(w.take) + u;
+    }
     var lines = [
       "Steam revenue estimate",
-      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " + pct(v.conv * 100) + " week-one conversion",
-      "First week: " + units(m.firstWeek) + " units · " + usdExact(m.weekTake) + " take-home",
-      "First month: " + units(m.firstMonth) + " units · " + usdExact(m.monthTake) + " take-home",
-      "First year: " + units(m.firstYear) + " units · " + usdExact(m.take) + " take-home",
+      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " +
+        pct(v.conv * 100) + " week-one conversion",
       "",
-      "First year — gross: " + usdExact(m.gross),
-      "Steam's cut: -" + usdExact(m.cut),
-      "Withholding (" + pct(v.tax * 100) + "): -" + usdExact(m.withheld),
-      "Take-home: " + usdExact(m.take),
+      block("First week", m.week),
+      block("First month", m.month),
+      block("First year", m.year),
       "",
-      "Estimated with the Steam Revenue Estimator — kolidestudio.com"
+      "Steam's cut and " + pct(v.tax * 100) + " withholding already deducted.",
+      "Estimated with the Kolide Studio Steam Revenue Estimator — kolidestudio.com"
     ];
     toClipboard(lines.join("\n"), this, "Copied");
   });
@@ -1091,6 +1176,7 @@ tbody tr.total td.val { font-size: 15px; }
     el.tax.value = "30";
     el.cur.value = "EUR";
     el.rate.value = 0.92;
+    setUnit(false);
     setPreset("indie");
   });
 
