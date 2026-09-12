@@ -606,6 +606,13 @@ tbody tr.total td {
           <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" />
           <div class="tip">Log scale, 100 to 1,000,000.</div>
         </div>
+
+        <div class="row">
+          <label for="s-late">Added in the final 8 weeks</label>
+          <output id="v-late" for="s-late">30%</output>
+          <input type="range" id="s-late" min="0" max="80" step="5" value="30" />
+          <div class="tip">Calendar-window adds. Counted at half.</div>
+        </div>
       </fieldset>
 
       <fieldset>
@@ -615,14 +622,14 @@ tbody tr.total td {
           <label for="s-conv">Week-one conversion</label>
           <output id="v-conv" for="s-conv">12%</output>
           <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" />
-          <div class="tip">Of your wishlists. Typical 8–20%.</div>
+          <div class="tip">Of long-held wishlists. Median ~10%.</div>
         </div>
 
         <div class="row">
-          <label for="s-organic">Word of mouth</label>
+          <label for="s-organic">Beyond wishlists</label>
           <output id="v-organic" for="s-organic">1.4×</output>
           <input type="range" id="s-organic" min="1" max="4" step="0.1" value="1.4" />
-          <div class="tip">1.0× = wishlist owners only.</div>
+          <div class="tip">Word of mouth, calendar, discovery. 1.0× = none.</div>
         </div>
 
         <div class="row">
@@ -749,7 +756,11 @@ tbody tr.total td {
     <summary>How it's calculated</summary>
     <ol class="steps">
       <li><b>First-week units</b>
-        <code>wishlists × conversion × word of mouth</code></li>
+        <code>wishlists × (1 − late share ÷ 2) × conversion × beyond wishlists</code>
+        <span>Since Steam's Personal Calendar hit the homepage, a game with a public date
+              picks up a wave of drive-by wishlists in its final eight weeks. Those are
+              counted at half weight: the conversion rate you set is for wishlists held
+              longer than that.</span></li>
       <li><b>First-year units</b>
         <code>first week × year-one sales</code>
         <span>A 2.5× game sells one and a half times its opening week again over the
@@ -780,6 +791,10 @@ tbody tr.total td {
 
     <h3>Assumptions</h3>
     <dl>
+      <dt>Late wishlists convert at half</dt>
+      <dd>There's no public data yet on calendar-era wishlists; half is a guess. Set the
+          share to 0% to switch it off.</dd>
+
       <dt>Steam's cut is tiered</dt>
       <dd>30% up to $10M gross, 25% to $50M, 20% above.</dd>
 
@@ -839,15 +854,15 @@ tbody tr.total td {
   CURRENCIES.forEach(function (c) { SYMBOLS[c[0]] = c[3]; });
 
   var PRESETS = {
-    impulse: { price: 4.99,  wl: 6000,   conv: 15, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
-    indie:   { price: 9.99,  wl: 10000,  conv: 12, organic: 1.4, tail: 2.5, reg: 25, ref: 8  },
-    premium: { price: 24.99, wl: 30000,  conv: 10, organic: 1.3, tail: 2.0, reg: 22, ref: 6  },
-    hit:     { price: 19.99, wl: 250000, conv: 18, organic: 2.2, tail: 3.5, reg: 24, ref: 6  }
+    impulse: { price: 4.99,  wl: 6000,   late: 40, conv: 15, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
+    indie:   { price: 9.99,  wl: 10000,  late: 30, conv: 12, organic: 1.4, tail: 2.5, reg: 25, ref: 8  },
+    premium: { price: 24.99, wl: 30000,  late: 20, conv: 10, organic: 1.3, tail: 2.0, reg: 22, ref: 6  },
+    hit:     { price: 19.99, wl: 250000, late: 35, conv: 18, organic: 2.2, tail: 3.5, reg: 24, ref: 6  }
   };
 
   var $ = function (id) { return document.getElementById(id); };
   var el = {
-    price: $("s-price"), wl: $("s-wl"), conv: $("s-conv"), organic: $("s-organic"),
+    price: $("s-price"), wl: $("s-wl"), late: $("s-late"), conv: $("s-conv"), organic: $("s-organic"),
     tail: $("s-tail"), reg: $("s-reg"), ref: $("s-ref"),
     tax: $("s-tax"), cur: $("s-cur"), rate: $("s-rate")
   };
@@ -910,6 +925,7 @@ tbody tr.total td {
     return {
       price:   parseFloat(el.price.value),
       wl:      posToWl(parseInt(el.wl.value, 10)),
+      late:    parseFloat(el.late.value) / 100,
       conv:    parseFloat(el.conv.value) / 100,
       organic: parseFloat(el.organic.value),
       tail:    parseFloat(el.tail.value),
@@ -920,6 +936,9 @@ tbody tr.total td {
   }
 
   var YEAR_WEEKS = 52;
+  // Wishlists added inside the Personal Calendar's eight-week window are
+  // drive-by adds; no public conversion data yet, so they count at half.
+  var LATE_WEIGHT = 0.5;
   // Week one feels only half the year's price erosion: regional pricing applies
   // from day one, deep discounts come later.
   var LAUNCH_SHARE = 0.5;
@@ -943,7 +962,7 @@ tbody tr.total td {
   }
 
   function model(v) {
-    var firstWeek  = v.wl * v.conv * v.organic;
+    var firstWeek  = v.wl * (1 - v.late * (1 - LATE_WEIGHT)) * v.conv * v.organic;
     var firstYear  = firstWeek * v.tail;
     var firstMonth = cumulative(firstWeek, v.tail, 4);
 
@@ -981,6 +1000,7 @@ tbody tr.total td {
 
     $("v-price").textContent   = "$" + v.price.toFixed(2);
     $("v-wl").textContent      = units(v.wl);
+    $("v-late").textContent    = pct(v.late * 100);
     $("v-conv").textContent    = pct(v.conv * 100);
     $("v-organic").textContent = v.organic.toFixed(1) + "×";
     $("v-tail").textContent    = v.tail.toFixed(1) + "×";
@@ -1033,7 +1053,7 @@ tbody tr.total td {
   function serialize() {
     return [el.price.value, el.wl.value, el.conv.value, el.organic.value,
             el.tail.value, el.reg.value, el.ref.value, el.tax.value,
-            el.cur.value, el.rate.value].join(",");
+            el.cur.value, el.rate.value, el.late.value].join(",");
   }
   function apply(str) {
     var p = String(str).split(",");
@@ -1046,6 +1066,8 @@ tbody tr.total td {
     if (parseFloat(p[1]) > 1000) el.wl.value = wlToPos(parseFloat(p[1]));
     if (p[8]) el.cur.value = p[8];
     if (p[9] && isFinite(parseFloat(p[9]))) el.rate.value = p[9];
+    // Links saved before the late-wishlist slider predate the calendar.
+    el.late.value = p[10] && isFinite(parseFloat(p[10])) ? p[10] : 0;
     return true;
   }
   function save() {
@@ -1056,6 +1078,7 @@ tbody tr.total td {
     var p = PRESETS[name] || PRESETS.indie;
     el.price.value   = p.price;
     el.wl.value      = wlToPos(p.wl);
+    el.late.value    = p.late;
     el.conv.value    = p.conv;
     el.organic.value = p.organic;
     el.tail.value    = p.tail;
@@ -1097,7 +1120,7 @@ tbody tr.total td {
   $("cur-alt").addEventListener("click", function () { setUnit(true); });
 
   // ── wiring ──
-  ["price", "wl", "conv", "organic", "tail", "reg", "ref"].forEach(function (k) {
+  ["price", "wl", "late", "conv", "organic", "tail", "reg", "ref"].forEach(function (k) {
     el[k].addEventListener("input", function () { markPreset(null); render(); });
   });
   el.tax.addEventListener("change", render);
@@ -1141,7 +1164,8 @@ tbody tr.total td {
     }
     var lines = [
       "Steam revenue estimate",
-      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists · " +
+      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists (" +
+        pct(v.late * 100) + " added in the final 8 weeks) · " +
         pct(v.conv * 100) + " week-one conversion",
       "",
       block("First week", m.week),
