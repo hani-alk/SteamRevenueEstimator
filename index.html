@@ -632,6 +632,8 @@ tbody tr.total td {
   color: var(--text-faint);
 }
 .colophon .byline { padding-bottom: 0; }
+.colophon .ver { color: var(--accent); }
+.colophon .ver-date { color: var(--text-faint); letter-spacing: 0.1em; }
 
 /* ── narrow screens ─────────────────────────────────────────────────── */
 @media (max-width: 880px) {
@@ -978,7 +980,8 @@ tbody tr.total td {
   </details>
 
   <div class="colophon">
-    <span>Steam Revenue Estimator</span>
+    <!-- bump this on every change that alters the numbers or the inputs -->
+    <span>Steam Revenue Estimator <span class="ver" id="ver">v2.0</span> <span class="ver-date">· Sep 2026</span></span>
     <span class="byline">
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
       <span class="sep" aria-hidden="true"></span>
@@ -1510,7 +1513,8 @@ tbody tr.total td {
       "",
       "All figures in " + unitCode() + ", with Steam's cut and " +
         pct(v.tax * 100) + " withholding already deducted.",
-      "Estimated with the Kolide Studio Steam Revenue Estimator — kolidestudio.com"
+      "Estimated with the Kolide Studio Steam Revenue Estimator " +
+        $("ver").textContent + " — kolidestudio.com"
     ];
     toClipboard(lines.join("\n"), this, "Copied");
   });
