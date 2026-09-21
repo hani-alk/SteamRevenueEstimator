@@ -4,14 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Steam Revenue Estimator</title>
-<meta name="description" content="Estimate first-week, first-month and first-year take-home revenue for any Steam game from wishlists, price, refunds, regional pricing and US withholding tax." />
+<meta name="description" content="Estimate how many copies a Steam game sells in its first week, month and year from wishlists and price, then what you take home after Steam's cut, refunds, regional pricing and US withholding tax." />
 <meta name="theme-color" content="#EADDCA" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='18' height='18' fill='%23C7352A'/%3E%3C/svg%3E" />
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Steam Revenue Estimator" />
-<meta property="og:description" content="Wishlists in, take-home out. First week, first month, first year — with Steam's cut, refunds, regional pricing and withholding tax." />
+<meta property="og:description" content="Wishlists in, copies and take-home out. First week, first month, first year — with Steam's cut, refunds, regional pricing and withholding tax." />
 <meta name="twitter:card" content="summary" />
 
 <style>
@@ -100,7 +100,7 @@ body {
 }
 
 /* label mixin used by legends, eyebrows, the colophon */
-.eyebrow, legend, th, .colophon, .byline, .presets > span {
+.eyebrow, legend, thead th, .colophon, .byline, .presets > span, .stat .k, .notes summary, .notes h3 {
   font-family: var(--f-display);
   font-size: 11px;
   font-weight: 700;
@@ -128,6 +128,7 @@ h1 {
   margin: 0;
 }
 h1 em { font-style: normal; color: var(--accent); }
+.lede { margin: 8px 0 0; color: var(--text-dim); font-size: 14px; max-width: 52ch; }
 .byline {
   display: flex;
   align-items: center;
@@ -191,17 +192,18 @@ h1 em { font-style: normal; color: var(--accent); }
 .ticker .k { color: var(--text-faint); }
 .ticker .v {
   font-family: var(--f-display);
-  font-size: 21px;
+  font-size: 19px;
   font-weight: 700;
   line-height: 1;
-  font-variant-numeric: tabular-nums;
   color: var(--text);
+  white-space: nowrap;
 }
+.ticker .v small { font-size: 13px; font-weight: 400; color: var(--text-dim); margin-left: 8px; }
 
 /* ── layout ─────────────────────────────────────────────────────────── */
 .cols {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
   gap: 40px;
   padding-top: 24px;
   align-items: start;
@@ -210,32 +212,86 @@ h1 em { font-style: normal; color: var(--accent); }
 fieldset {
   border: 0;
   padding: 0;
-  margin: 0 0 26px;
+  margin: 0 0 28px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 legend {
   color: var(--text-faint);
   padding: 0 0 10px;
   width: 100%;
   border-bottom: 1px solid var(--line-soft);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
-/* ── controls ───────────────────────────────────────────────────────── */
-.row { display: grid; grid-template-columns: 1fr auto; gap: 3px 14px; align-items: baseline; }
-.row label { font-size: 14px; color: var(--text); }
-.row output {
+/* ── controls: a typed number and a slider, kept in step ────────────── */
+.field { display: grid; grid-template-columns: 1fr auto; gap: 6px 14px; align-items: center; }
+.field label { font-size: 14px; color: var(--text); }
+.field input[type="range"] { grid-column: 1 / -1; }
+.field .tip { grid-column: 1 / -1; font-size: 11.5px; color: var(--text-faint); margin-top: -4px; }
+
+.num {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  width: 132px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  transition: border-color 120ms, box-shadow 120ms;
+}
+.num:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.num .pre, .num .suf {
+  flex: none;
   font-family: var(--f-data);
-  font-size: 14px;
+  font-size: 12.5px;
+  color: var(--text-faint);
+  padding: 0 0 0 10px;
+  user-select: none;
+}
+.num .suf { padding: 0 10px 0 0; }
+.num input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  font-family: var(--f-data);
+  font-size: 14.5px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  text-align: right;
   color: var(--text);
+  text-align: right;
+  background: transparent;
+  border: 0;
+  padding: 0 6px;
+  outline: none;
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
-.row input[type="range"] { grid-column: 1 / -1; }
-.row .tip { grid-column: 1 / -1; font-size: 11.5px; color: var(--text-faint); margin-top: -5px; }
+.num input::-webkit-outer-spin-button,
+.num input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num.wide { width: 150px; }
+
+/* one-tap price points */
+.points { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 6px; margin-top: -2px; }
+.pt {
+  font-family: var(--f-data);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+  background: transparent;
+  border: 1px solid var(--line-soft);
+  border-radius: 3px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+}
+.pt:hover { border-color: var(--accent); color: var(--accent); }
+.pt[aria-pressed="true"] { background: var(--text); border-color: var(--text); color: var(--ground); }
 
 input[type="range"] {
   -webkit-appearance: none;
@@ -276,19 +332,22 @@ input[type="range"]:focus-visible::-moz-range-thumb {
   input[type="range"]::-moz-range-thumb { width: 22px; height: 22px; }
 }
 
-select, input[type="number"] {
+select {
   font: inherit;
-  font-size: 15px;
+  font-size: 14.5px;
   color: var(--text);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 3px;
-  padding: 9px 10px;
+  padding: 8px 10px;
+  height: 36px;
   width: 100%;
   min-width: 0;
 }
-input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular-nums; }
-.pair { display: grid; grid-template-columns: 1fr 110px; gap: 10px; }
+/* minmax(0, …) so a select with long options can't push the column wider than the page */
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) 132px; gap: 10px; }
+.stack { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.stack label { font-size: 14px; }
 
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
@@ -299,94 +358,70 @@ input[type="number"] { font-family: var(--f-data); font-variant-numeric: tabular
   background: var(--surface);
   border: 1px solid var(--line);
   border-top: 3px solid var(--accent);
-  padding: 22px;
+  padding: 22px 24px 20px;
   box-shadow: var(--shadow);
 }
 .eyebrow { color: var(--text-faint); }
-/* stacked split bar */
-.bar { display: flex; gap: 2px; height: 34px; margin: 26px 0 12px; }
-.bar span { min-width: 3px; transition: flex-basis 180ms ease; }
-.bar .seg-cut  { background: var(--bar-cut); }
-.bar .seg-tax  {
-  background: var(--bar-tax);
-  background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px);
-}
-.bar .seg-take { background: var(--bar-take); }
-.bar span:first-child { border-radius: 4px 0 0 4px; }
-.bar span:last-child  { border-radius: 0 4px 4px 0; }
-
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-dim); }
-.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; font-style: normal; }
-.legend .k-cut  { background: var(--bar-cut); }
-.legend .k-tax  { background: var(--bar-tax); background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px); }
-.legend .k-take { background: var(--bar-take); }
-
-.kpis {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line-soft);
-}
-.kpi { display: flex; flex-wrap: wrap; align-items: baseline; gap: 1px 9px; }
-.kpi .k {
-  flex-basis: 100%;
-  font-size: 11px;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-faint);
-}
-.kpi .v {
-  font-family: var(--f-data);
-  font-size: 14px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-dim);
-}
-
-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
-th, td { padding: 8px 0; text-align: left; }
-thead th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 9px; }
-thead th:first-child { width: 31%; }
-thead th + th, tbody td { text-align: right; padding-left: 12px; }
-tbody th {
-  font-family: var(--f-body);
-  font-size: 13.5px;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-  color: var(--text-dim);
-  border-bottom: 1px solid var(--line-soft);
-}
-tbody td {
-  font-family: var(--f-data);
-  font-variant-numeric: tabular-nums;
-  color: var(--text);
-  border-bottom: 1px solid var(--line-soft);
-}
-/* Deductions read as deductions by their minus sign, not by colour — red is
-   reserved for money you keep, in the table and in the bar alike. */
-tbody tr.minus td { color: var(--text-dim); }
-tbody tr.total th, tbody tr.total td { border-bottom: 0; padding-top: 13px; }
-tbody tr.total th { color: var(--text); font-weight: 600; }
-tbody tr.total td {
-  font-family: var(--f-display);
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  color: var(--accent);
-}
-
-/* ── panel head: label + the currency the whole panel is counted in ── */
 .panel-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
+.panel-head .sub { font-size: 12.5px; color: var(--text-faint); }
+
+/* copies sold: the headline */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px 18px;
+}
+.stat { display: grid; gap: 5px; min-width: 0; }
+.stat .k { color: var(--text-faint); }
+.stat .v {
+  font-family: var(--f-display);
+  font-size: clamp(27px, 3.1vw, 36px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+.stat .s { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
+
+/* cumulative copies over the year */
+.curve { margin: 18px 0 0; position: relative; }
+.curve svg { display: block; width: 100%; height: 150px; overflow: visible; }
+.curve .grid line { stroke: var(--line-soft); stroke-width: 1; }
+.curve .axis text { font-family: var(--f-data); font-size: 10.5px; fill: var(--text-faint); }
+.curve .area { fill: var(--accent); opacity: 0.10; }
+.curve .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.curve .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.curve .mark text { font-family: var(--f-data); font-size: 10.5px; fill: var(--text-dim); }
+.curve .cross { stroke: var(--text-dim); stroke-width: 1; opacity: 0; pointer-events: none; }
+.curve .hover { fill: transparent; cursor: crosshair; }
+.curve .cross.on { opacity: 1; }
+.tip-box {
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -4px);
+  padding: 4px 8px;
+  font-family: var(--f-data);
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 80ms;
+}
+.tip-box.on { opacity: 1; }
+
+/* money */
+.money { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
 .units {
   display: flex;
   border: 1px solid var(--line);
@@ -410,6 +445,81 @@ tbody tr.total td {
 .unit:hover { color: var(--text); }
 .unit[aria-pressed="true"] { background: var(--text); color: var(--ground); }
 
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { padding: 8px 0; text-align: left; }
+thead th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 9px; }
+thead th:first-child { width: 30%; }
+thead th + th, tbody td { text-align: right; padding-left: 12px; }
+tbody th {
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--line-soft);
+}
+tbody td {
+  font-family: var(--f-data);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+  border-bottom: 1px solid var(--line-soft);
+}
+/* Deductions read as deductions by their minus sign, not by colour — red is
+   reserved for money you keep, in the table and in the bar alike. */
+tbody tr.minus td { color: var(--text-dim); }
+tbody tr.total th, tbody tr.total td { border-bottom: 0; padding-top: 13px; }
+tbody tr.total th { color: var(--text); font-weight: 600; }
+tbody tr.total td {
+  font-family: var(--f-display);
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+}
+
+/* stacked split bar */
+.bar { display: flex; gap: 2px; height: 14px; margin: 18px 0 10px; }
+.bar span { min-width: 3px; transition: flex-basis 180ms ease; }
+.bar .seg-cut  { background: var(--bar-cut); }
+.bar .seg-tax  {
+  background: var(--bar-tax);
+  background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px);
+}
+.bar .seg-take { background: var(--bar-take); }
+.bar span:first-child { border-radius: 3px 0 0 3px; }
+.bar span:last-child  { border-radius: 0 3px 3px 0; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-dim); }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; font-style: normal; }
+.legend .k-cut  { background: var(--bar-cut); }
+.legend .k-tax  { background: var(--bar-tax); background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px); }
+.legend .k-take { background: var(--bar-take); }
+
+.kpis {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px 16px;
+  margin: 16px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+.kpi { display: grid; gap: 2px; }
+.kpi .k {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.kpi .v {
+  font-family: var(--f-data);
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-dim);
+}
+
 .sr-only {
   position: absolute;
   width: 1px; height: 1px;
@@ -420,7 +530,7 @@ tbody tr.total td {
   border: 0;
 }
 
-.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 22px; }
+.tools { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 20px; }
 .btn-quiet {
   font: inherit;
   font-size: 13px;
@@ -448,11 +558,6 @@ tbody tr.total td {
 /* ── assumptions, folded away ───────────────────────────────────────── */
 .notes { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--line); }
 .notes summary {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--text-faint);
   cursor: pointer;
   list-style: none;
@@ -472,11 +577,6 @@ tbody tr.total td {
 .notes dt { font-weight: 600; color: var(--text); }
 .notes dd { margin: 2px 0 0; }
 .notes h3 {
-  font-family: var(--f-display);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--text-faint);
   margin: 26px 0 0;
   padding-top: 16px;
@@ -542,15 +642,21 @@ tbody tr.total td {
   .mast { align-items: flex-start; gap: 10px; }
   .byline { padding-bottom: 0; }
   .presets { gap: 7px; padding: 14px 0; }
-  fieldset { margin-bottom: 22px; }
+  fieldset { margin-bottom: 24px; }
 }
-@media (max-width: 380px) {
-  .kpis { grid-template-columns: 1fr; }
+@media (max-width: 420px) {
+  .stats { gap: 10px 12px; }
+  .stat .v { font-size: 24px; }
+  .stat .s { font-size: 11px; }
+  .kpis { grid-template-columns: 1fr 1fr; }
   table { font-size: 12.5px; }
   thead th + th, tbody td { padding-left: 8px; }
   tbody th { font-size: 12.5px; }
   tbody tr.total td { font-size: 17px; }
   .pair { grid-template-columns: 1fr; }
+  .pair .num { width: 100%; }
+  .num { width: 118px; }
+  .num.wide { width: 132px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -565,6 +671,7 @@ tbody tr.total td {
   <header class="mast">
     <div>
       <h1>Steam Revenue <em>Estimator</em></h1>
+      <p class="lede">How many copies your game sells in its first week, month and year — and what lands in your bank account.</p>
     </div>
     <div class="byline">
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
@@ -582,98 +689,111 @@ tbody tr.total td {
   </div>
 
   <div class="ticker" aria-hidden="true">
-    <span class="k eyebrow">First-year take-home</span>
-    <span class="v" id="t-take">—</span>
+    <span class="k eyebrow">First year</span>
+    <span class="v"><span id="t-units">—</span> copies<small id="t-take">—</small></span>
   </div>
 
   <div class="cols">
 
     <!-- ── controls ── -->
-    <form id="controls" autocomplete="off">
+    <form id="controls" autocomplete="off" novalidate>
 
       <fieldset>
-        <legend>The game</legend>
+        <legend>Your game</legend>
 
-        <div class="row">
-          <label for="s-price">Store price</label>
-          <output id="v-price" for="s-price">$9.99</output>
-          <input type="range" id="s-price" min="0.99" max="79.99" step="1" value="9.99" />
+        <div class="field">
+          <label for="i-price">Store price</label>
+          <div class="num"><span class="pre">$</span><input type="number" id="i-price" min="0.99" max="199.99" step="0.01" value="9.99" inputmode="decimal" /></div>
+          <input type="range" id="s-price" min="0.99" max="79.99" step="1" value="9.99" aria-label="Store price slider" />
+          <div class="points" role="group" aria-label="Common price points">
+            <button class="pt" type="button" data-price="4.99">4.99</button>
+            <button class="pt" type="button" data-price="9.99">9.99</button>
+            <button class="pt" type="button" data-price="14.99">14.99</button>
+            <button class="pt" type="button" data-price="19.99">19.99</button>
+            <button class="pt" type="button" data-price="24.99">24.99</button>
+            <button class="pt" type="button" data-price="29.99">29.99</button>
+          </div>
         </div>
 
-        <div class="row">
-          <label for="s-wl">Wishlists at launch</label>
-          <output id="v-wl" for="s-wl">10,000</output>
-          <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" />
-          <div class="tip">Log scale, 100 to 1,000,000.</div>
+        <div class="field">
+          <label for="i-wl">Wishlists at launch</label>
+          <div class="num wide"><input type="number" id="i-wl" min="0" max="10000000" step="1" value="10000" inputmode="numeric" /></div>
+          <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" aria-label="Wishlists slider" />
+          <div class="tip">Type the exact count, or drag — the slider runs 100 to 1,000,000 on a log scale.</div>
         </div>
 
-        <div class="row">
-          <label for="s-late">Added in the final 8 weeks</label>
-          <output id="v-late" for="s-late">30%</output>
-          <input type="range" id="s-late" min="0" max="80" step="5" value="30" />
-          <div class="tip">Calendar-window adds. Counted at half.</div>
+        <div class="field">
+          <label for="i-late">Added in the final 8 weeks</label>
+          <div class="num"><input type="number" id="i-late" min="0" max="100" step="1" value="30" inputmode="numeric" /><span class="suf">%</span></div>
+          <input type="range" id="s-late" min="0" max="80" step="5" value="30" aria-label="Late wishlists slider" />
+          <div class="tip">Wishlists gained inside Steam's calendar window. Counted at half weight.</div>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>Sales model</legend>
+        <legend>How it sells</legend>
 
-        <div class="row">
-          <label for="s-conv">Week-one conversion</label>
-          <output id="v-conv" for="s-conv">12%</output>
-          <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" />
-          <div class="tip">Of long-held wishlists. Median ~10%.</div>
+        <div class="field">
+          <label for="i-conv">Week-one conversion</label>
+          <div class="num"><input type="number" id="i-conv" min="0" max="100" step="0.5" value="12" inputmode="decimal" /><span class="suf">%</span></div>
+          <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" aria-label="Conversion slider" />
+          <div class="tip">Of long-held wishlists that buy in week one. Median is around 10%; 15–20% is a strong launch.</div>
         </div>
 
-        <div class="row">
-          <label for="s-organic">Beyond wishlists</label>
-          <output id="v-organic" for="s-organic">1.4×</output>
-          <input type="range" id="s-organic" min="1" max="4" step="0.1" value="1.4" />
-          <div class="tip">Word of mouth, calendar, discovery. 1.0× = none.</div>
+        <div class="field">
+          <label for="i-organic">Beyond wishlists</label>
+          <div class="num"><input type="number" id="i-organic" min="1" max="10" step="0.1" value="1.4" inputmode="decimal" /><span class="suf">×</span></div>
+          <input type="range" id="s-organic" min="1" max="4" step="0.1" value="1.4" aria-label="Organic multiplier slider" />
+          <div class="tip">Buyers who never wishlisted: word of mouth, front-page features, discovery queue. 1.0× = none.</div>
         </div>
 
-        <div class="row">
-          <label for="s-tail">Year-one sales</label>
-          <output id="v-tail" for="s-tail">2.5×</output>
-          <input type="range" id="s-tail" min="1" max="15" step="0.5" value="2.5" />
-          <div class="tip">× the first week.</div>
+        <div class="field">
+          <label for="i-tail">Year-one sales</label>
+          <div class="num"><input type="number" id="i-tail" min="1" max="30" step="0.5" value="2.5" inputmode="decimal" /><span class="suf">×</span></div>
+          <input type="range" id="s-tail" min="1" max="15" step="0.5" value="2.5" aria-label="Year-one multiple slider" />
+          <div class="tip">Total first-year copies as a multiple of the first week. 2–3× is typical; seasonal sales push it higher.</div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Price erosion</legend>
 
-        <div class="row">
-          <label for="s-reg">Discounts + regional pricing</label>
-          <output id="v-reg" for="s-reg">25%</output>
-          <input type="range" id="s-reg" min="0" max="60" step="1" value="25" />
-          <div class="tip">Average off list price.</div>
+        <div class="field">
+          <label for="i-reg">Regional pricing, VAT &amp; discounts</label>
+          <div class="num"><input type="number" id="i-reg" min="0" max="90" step="1" value="25" inputmode="numeric" /><span class="suf">%</span></div>
+          <input type="range" id="s-reg" min="0" max="60" step="1" value="25" aria-label="Price erosion slider" />
+          <div class="tip">How far the average sale lands below US list. Steam strips VAT before paying you; 25–35% is normal for a global launch.</div>
         </div>
 
-        <div class="row">
-          <label for="s-ref">Refund rate</label>
-          <output id="v-ref" for="s-ref">8%</output>
-          <input type="range" id="s-ref" min="0" max="25" step="0.5" value="8" />
-          <div class="tip">Steam average 5–10%.</div>
+        <div class="field">
+          <label for="i-ref">Refund rate</label>
+          <div class="num"><input type="number" id="i-ref" min="0" max="50" step="0.5" value="8" inputmode="decimal" /><span class="suf">%</span></div>
+          <input type="range" id="s-ref" min="0" max="25" step="0.5" value="8" aria-label="Refund rate slider" />
+          <div class="tip">Steam average is 5–10%. Short games and rough launches run higher.</div>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Getting paid</legend>
 
-        <div class="row"><label for="s-tax">US withholding</label></div>
-        <select id="s-tax">
-          <option value="30" selected>30% — no US tax treaty</option>
-          <option value="15">15% — treaty rate (India, Indonesia)</option>
-          <option value="10">10% — treaty rate (Poland, Türkiye)</option>
-          <option value="5">5% — treaty rate (Australia, Spain)</option>
-          <option value="0">0% — treaty rate (UK, Germany, France, Japan)</option>
-        </select>
+        <div class="stack">
+          <label for="s-tax">US withholding tax</label>
+          <select id="s-tax">
+            <option value="30" selected>30% — no US tax treaty (Jordan, UAE, Brazil, Argentina, Singapore, Taiwan…)</option>
+            <option value="15">15% — India</option>
+            <option value="10">10% — Poland, Türkiye, China, South Korea, Mexico, Israel, Indonesia</option>
+            <option value="5">5% — Australia</option>
+            <option value="0">0% — UK, Germany, France, Netherlands, Ireland, Spain, Canada, Japan…</option>
+            <option value="0">0% — US company or person (W-9, no withholding)</option>
+          </select>
+        </div>
 
-        <div class="row"><label for="s-cur">Second currency</label></div>
-        <div class="pair">
-          <select id="s-cur"></select>
-          <input type="number" id="s-rate" step="0.0001" min="0" aria-label="Units per US dollar" />
+        <div class="stack">
+          <label for="s-cur">Second currency</label>
+          <div class="pair">
+            <select id="s-cur"></select>
+            <div class="num"><input type="number" id="s-rate" step="0.0001" min="0" aria-label="Units per US dollar" inputmode="decimal" /><span class="suf">/ $</span></div>
+          </div>
         </div>
       </fieldset>
 
@@ -684,63 +804,93 @@ tbody tr.total td {
       <p class="sr-only" aria-live="polite" id="live"></p>
 
       <div class="panel-head">
-        <span class="eyebrow">What you take home</span>
-        <span class="units" role="group" aria-label="Show figures in">
-          <button class="unit" type="button" id="cur-usd" aria-pressed="true">USD</button>
-          <button class="unit" type="button" id="cur-alt" aria-pressed="false">EUR</button>
-        </span>
+        <span class="eyebrow">Copies sold</span>
+        <span class="sub">before refunds</span>
       </div>
 
-      <table>
-        <thead><tr>
-          <th scope="col"><span class="sr-only">Line</span></th>
-          <th scope="col">First week</th>
-          <th scope="col">First month</th>
-          <th scope="col">First year</th>
-        </tr></thead>
-        <tbody>
-          <tr>
-            <th scope="row">Units sold</th>
-            <td id="n-wk">—</td><td id="n-mo">—</td><td id="n-yr">—</td>
-          </tr>
-          <tr>
-            <th scope="row">Gross revenue</th>
-            <td id="g-wk">—</td><td id="g-mo">—</td><td id="g-yr">—</td>
-          </tr>
-          <tr class="minus">
-            <th scope="row" id="l-steam">Steam's cut</th>
-            <td id="c-wk">—</td><td id="c-mo">—</td><td id="c-yr">—</td>
-          </tr>
-          <tr class="minus">
-            <th scope="row" id="l-wh">Withholding</th>
-            <td id="w-wk">—</td><td id="w-mo">—</td><td id="w-yr">—</td>
-          </tr>
-          <tr class="total">
-            <th scope="row">Take-home</th>
-            <td id="t-wk">—</td><td id="t-mo">—</td><td id="t-yr">—</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <div class="bar" id="bar" role="img" aria-label="Split of first-year gross revenue">
-        <span class="seg-cut"  id="seg-cut"  style="flex: 0 0 30%"></span>
-        <span class="seg-tax"  id="seg-tax"  style="flex: 0 0 21%"></span>
-        <span class="seg-take" id="seg-take" style="flex: 0 0 49%"></span>
-      </div>
-      <div class="legend">
-        <span><i class="k-cut"></i><span id="l-cut">Steam 30%</span></span>
-        <span><i class="k-tax"></i><span id="l-tax">Withheld 21%</span></span>
-        <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
-      </div>
-
-      <div class="kpis">
-        <div class="kpi">
-          <div class="k">Avg. sale price</div>
-          <div class="v" id="o-eff">—</div>
+      <div class="stats">
+        <div class="stat">
+          <div class="k">First week</div>
+          <div class="v" id="u-wk">—</div>
+          <div class="s" id="r-wk">—</div>
         </div>
-        <div class="kpi">
-          <div class="k">You keep per copy</div>
-          <div class="v" id="o-per">—</div>
+        <div class="stat">
+          <div class="k">First month</div>
+          <div class="v" id="u-mo">—</div>
+          <div class="s" id="r-mo">—</div>
+        </div>
+        <div class="stat">
+          <div class="k">First year</div>
+          <div class="v" id="u-yr">—</div>
+          <div class="s" id="r-yr">—</div>
+        </div>
+      </div>
+
+      <figure class="curve" aria-label="Cumulative copies sold over the first year">
+        <svg id="curve" role="img"></svg>
+        <div class="tip-box" id="curve-tip"></div>
+      </figure>
+
+      <div class="money">
+        <div class="panel-head">
+          <span class="eyebrow">What you take home</span>
+          <span class="units" role="group" aria-label="Show figures in">
+            <button class="unit" type="button" id="cur-usd" aria-pressed="true">USD</button>
+            <button class="unit" type="button" id="cur-alt" aria-pressed="false">EUR</button>
+          </span>
+        </div>
+
+        <table>
+          <thead><tr>
+            <th scope="col"><span class="sr-only">Line</span></th>
+            <th scope="col">First week</th>
+            <th scope="col">First month</th>
+            <th scope="col">First year</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <th scope="row">Gross revenue</th>
+              <td id="g-wk">—</td><td id="g-mo">—</td><td id="g-yr">—</td>
+            </tr>
+            <tr class="minus">
+              <th scope="row" id="l-steam">Steam's cut</th>
+              <td id="c-wk">—</td><td id="c-mo">—</td><td id="c-yr">—</td>
+            </tr>
+            <tr class="minus">
+              <th scope="row" id="l-wh">Withholding</th>
+              <td id="w-wk">—</td><td id="w-mo">—</td><td id="w-yr">—</td>
+            </tr>
+            <tr class="total">
+              <th scope="row">Take-home</th>
+              <td id="t-wk">—</td><td id="t-mo">—</td><td id="t-yr">—</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="bar" id="bar" role="img" aria-label="Split of first-year gross revenue">
+          <span class="seg-cut"  id="seg-cut"  style="flex: 0 0 30%"></span>
+          <span class="seg-tax"  id="seg-tax"  style="flex: 0 0 21%"></span>
+          <span class="seg-take" id="seg-take" style="flex: 0 0 49%"></span>
+        </div>
+        <div class="legend">
+          <span><i class="k-cut"></i><span id="l-cut">Steam 30%</span></span>
+          <span><i class="k-tax"></i><span id="l-tax">Withheld 21%</span></span>
+          <span><i class="k-take"></i><span id="l-take">You 49%</span></span>
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">
+            <div class="k">Copies you're paid for</div>
+            <div class="v" id="o-paid">—</div>
+          </div>
+          <div class="kpi">
+            <div class="k">Avg. sale price</div>
+            <div class="v" id="o-eff">—</div>
+          </div>
+          <div class="kpi">
+            <div class="k">You keep per copy</div>
+            <div class="v" id="o-per">—</div>
+          </div>
         </div>
       </div>
 
@@ -755,30 +905,30 @@ tbody tr.total td {
   <details class="notes">
     <summary>How it's calculated</summary>
     <ol class="steps">
-      <li><b>First-week units</b>
+      <li><b>First-week copies</b>
         <code>wishlists × (1 − late share ÷ 2) × conversion × beyond wishlists</code>
         <span>Since Steam's Personal Calendar hit the homepage, a game with a public date
               picks up a wave of drive-by wishlists in its final eight weeks. Those are
               counted at half weight: the conversion rate you set is for wishlists held
               longer than that.</span></li>
-      <li><b>First-year units</b>
+      <li><b>First-year copies</b>
         <code>first week × year-one sales</code>
         <span>A 2.5× game sells one and a half times its opening week again over the
               following eleven months.</span></li>
-      <li><b>First-month units</b>
+      <li><b>First-month copies</b>
         <code>first week × 4 ^ (ln(year-one sales) ÷ ln 52)</code>
         <span>Sales pile up on a power curve rather than a straight line, anchored so that
-              week 52 lands exactly on the first-year figure. The month reads off the same
-              curve, so nothing here depends on guessing how long the game sells for.</span></li>
-      <li><b>Units you're paid for</b>
-        <code>units × (1 − refund rate)</code></li>
+              week 52 lands exactly on the first-year figure. The month — and the curve
+              in the panel — read off the same formula.</span></li>
+      <li><b>Copies you're paid for</b>
+        <code>copies × (1 − refund rate)</code></li>
       <li><b>Sale price at each milestone</b>
         <code>price × (1 − erosion × (0.5 + 0.5 × share of the year sold))</code>
-        <span>The first week feels half the erosion you set — regional pricing applies from
-              day one, but the deep discounts come later. By week 52 it feels all of it, and
-              the month lands on the ramp between.</span></li>
+        <span>The first week feels half the erosion you set — regional pricing and VAT
+              apply from day one, but the deep discounts come later. By week 52 it feels
+              all of it, and the month lands on the ramp between.</span></li>
       <li><b>Gross revenue</b>
-        <code>units paid for × average sale price</code></li>
+        <code>copies paid for × average sale price</code></li>
       <li><b>Steam's cut</b>
         <code>30% to $10M · 25% to $50M · 20% above</code>
         <span>Tiers count from your first dollar, so each milestone is charged on its
@@ -796,13 +946,17 @@ tbody tr.total td {
           share to 0% to switch it off.</dd>
 
       <dt>Steam's cut is tiered</dt>
-      <dd>30% up to $10M gross, 25% to $50M, 20% above.</dd>
+      <dd>30% up to $10M lifetime gross, 25% to $50M, 20% above. Almost every indie
+          sits in the first tier for its whole life.</dd>
 
-      <dt>Gross is already net of VAT</dt>
-      <dd>That's how Valve reports it, so there's no separate line.</dd>
+      <dt>Gross is already net of VAT and sales tax</dt>
+      <dd>Steam's price in most regions includes VAT, which Valve strips before splitting
+          the money. That, plus regional pricing, is why the erosion slider defaults well
+          above zero.</dd>
 
-      <dt>Refunds are removed as units</dt>
-      <dd>A refund costs you the whole sale, not a slice of it.</dd>
+      <dt>Refunds are removed as copies</dt>
+      <dd>A refund costs you the whole sale, not a slice of it. Steam's revenue share is
+          charged on what's left.</dd>
 
       <dt>Everything stops at twelve months</dt>
       <dd>No guess is made about what the game earns after that.</dd>
@@ -811,7 +965,12 @@ tbody tr.total td {
       <dd>Steam Direct, ports, marketing and your own costs aren't modelled.</dd>
 
       <dt>Withholding follows your W-8BEN</dt>
-      <dd>Treaty rates vary by country. Confirm yours with an accountant.</dd>
+      <dd>Treaty rates vary by country and the list above is a shortcut, not advice —
+          confirm yours with an accountant. US developers file a W-9 and see none.</dd>
+
+      <dt>Money arrives about a month later</dt>
+      <dd>Valve pays each month's earnings around the 30th of the following month, once
+          you're over $100.</dd>
 
       <dt>Exchange rates are approximate</dt>
       <dd>Type today's rate over the default if it matters.</dd>
@@ -861,11 +1020,6 @@ tbody tr.total td {
   };
 
   var $ = function (id) { return document.getElementById(id); };
-  var el = {
-    price: $("s-price"), wl: $("s-wl"), late: $("s-late"), conv: $("s-conv"), organic: $("s-organic"),
-    tail: $("s-tail"), reg: $("s-reg"), ref: $("s-ref"),
-    tax: $("s-tax"), cur: $("s-cur"), rate: $("s-rate")
-  };
 
   // ── wishlist slider: log scale, 100 → 1,000,000 over 0–1000 ──
   var WL_MIN = 100, WL_SPAN = 4; // decades
@@ -877,6 +1031,71 @@ tbody tr.total td {
   function wlToPos(w) {
     return Math.round(1000 * Math.log(Math.max(WL_MIN, w) / WL_MIN) / Math.LN10 / WL_SPAN);
   }
+
+  // ── inputs: each value has a typed field (the truth) and a slider (a handle) ──
+  // The number field can go past the slider's range; the slider just pins to its end.
+  var FIELDS = {
+    price:   { min: 0.99, max: 199.99, dec: 2 },
+    wl:      { min: 0,    max: 1e7,    dec: 0, log: true },
+    late:    { min: 0,    max: 100,    dec: 0 },
+    conv:    { min: 0,    max: 100,    dec: 1 },
+    organic: { min: 1,    max: 10,     dec: 1 },
+    tail:    { min: 1,    max: 30,     dec: 1 },
+    reg:     { min: 0,    max: 90,     dec: 0 },
+    ref:     { min: 0,    max: 50,     dec: 1 }
+  };
+  var KEYS = Object.keys(FIELDS);
+  var el = { tax: $("s-tax"), cur: $("s-cur"), rate: $("s-rate") };
+  KEYS.forEach(function (k) {
+    FIELDS[k].num = $("i-" + k);
+    FIELDS[k].range = $("s-" + k);
+  });
+
+  // Last valid value per field, so a half-typed number never blanks the panel.
+  var state = {};
+
+  function clampTo(k, x) {
+    var f = FIELDS[k];
+    x = Math.min(f.max, Math.max(f.min, x));
+    return Math.round(x * Math.pow(10, f.dec)) / Math.pow(10, f.dec);
+  }
+  // Prices keep their cents; everything else drops a trailing ".0".
+  function text(k, x) {
+    var f = FIELDS[k];
+    if (f.dec === 2) return x.toFixed(2);
+    return String(Math.round(x * Math.pow(10, f.dec)) / Math.pow(10, f.dec));
+  }
+  function setValue(k, x, opts) {
+    var f = FIELDS[k];
+    x = clampTo(k, x);
+    state[k] = x;
+    if (!(opts && opts.keepText)) f.num.value = text(k, x);
+    f.range.value = f.log ? wlToPos(x) : x;
+  }
+  function get(k) { return state[k]; }
+
+  KEYS.forEach(function (k) {
+    var f = FIELDS[k];
+    f.range.addEventListener("input", function () {
+      var x = f.log ? posToWl(parseInt(f.range.value, 10)) : parseFloat(f.range.value);
+      setValue(k, x);
+      markPreset(null);
+      render();
+    });
+    f.num.addEventListener("input", function () {
+      var x = parseFloat(f.num.value);
+      if (!isFinite(x)) return;
+      setValue(k, x, { keepText: true });
+      markPreset(null);
+      render();
+    });
+    // On blur, settle whatever was typed into a clean, in-range number.
+    f.num.addEventListener("change", function () {
+      var x = parseFloat(f.num.value);
+      setValue(k, isFinite(x) ? x : state[k]);
+      render();
+    });
+  });
 
   // ── formatting ──
   // The panel counts in one currency at a time; the toggle above the table is
@@ -892,17 +1111,22 @@ tbody tr.total td {
   // a glyph like $ or € does not.
   function unitSymbol() {
     var u = SYMBOLS[unitCode()] || unitCode();
-    return /[a-zà-ɏ]$/i.test(u) ? u + " " : u;
+    return /[a-zà-ɏ]$/i.test(u) ? u + " " : u;
   }
   function inUnit(n) { return showAlt ? n * fxRate() : n; }
   function usable() { return !showAlt || fxRate() > 0; }
 
+  function compact(x) {
+    var a = Math.abs(x);
+    if (a >= 1e6) return (x / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.?0+$/, "") + "M";
+    if (a >= 1e4) return Math.round(x / 1e3) + "k";
+    return Math.round(x).toLocaleString("en-US");
+  }
   function money(n) {
     if (!usable()) return "—";
-    var u = unitSymbol(), x = inUnit(n), a = Math.abs(x);
-    if (a >= 1e6) return u + (x / 1e6).toFixed(a >= 1e7 ? 1 : 2).replace(/\.0+$/, "") + "M";
-    if (a >= 1e5) return u + Math.round(x / 1e3) + "k";
-    return u + Math.round(x).toLocaleString("en-US");
+    var x = inUnit(n);
+    if (Math.abs(x) >= 1e5) return unitSymbol() + compact(x);
+    return unitSymbol() + Math.round(x).toLocaleString("en-US");
   }
   function moneyExact(n) {
     return usable() ? unitSymbol() + Math.round(inUnit(n)).toLocaleString("en-US") : "—";
@@ -923,14 +1147,14 @@ tbody tr.total td {
 
   function read() {
     return {
-      price:   parseFloat(el.price.value),
-      wl:      posToWl(parseInt(el.wl.value, 10)),
-      late:    parseFloat(el.late.value) / 100,
-      conv:    parseFloat(el.conv.value) / 100,
-      organic: parseFloat(el.organic.value),
-      tail:    parseFloat(el.tail.value),
-      reg:     parseFloat(el.reg.value) / 100,
-      ref:     parseFloat(el.ref.value) / 100,
+      price:   get("price"),
+      wl:      get("wl"),
+      late:    get("late") / 100,
+      conv:    get("conv") / 100,
+      organic: get("organic"),
+      tail:    get("tail"),
+      reg:     get("reg") / 100,
+      ref:     get("ref") / 100,
       tax:     parseFloat(el.tax.value) / 100
     };
   }
@@ -939,14 +1163,16 @@ tbody tr.total td {
   // Wishlists added inside the Personal Calendar's eight-week window are
   // drive-by adds; no public conversion data yet, so they count at half.
   var LATE_WEIGHT = 0.5;
-  // Week one feels only half the year's price erosion: regional pricing applies
-  // from day one, deep discounts come later.
+  // Week one feels only half the year's price erosion: regional pricing and
+  // VAT apply from day one, deep discounts come later.
   var LAUNCH_SHARE = 0.5;
 
   // Units accumulate on a power curve across the first year, where the
   // first-year multiplier sets the exponent: cumulative(n) = week one × n^a,
   // with a = ln(multiplier) / ln(52) so week 52 lands exactly on the year.
+  // Inside week one the curve is a straight ramp from zero.
   function cumulative(week1, yearMult, weeks) {
+    if (weeks <= 1) return week1 * Math.max(weeks, 0);
     if (yearMult <= 1) return week1;
     var a = Math.log(yearMult) / Math.log(YEAR_WEEKS);
     return week1 * Math.pow(Math.min(weeks, YEAR_WEEKS), a);
@@ -984,40 +1210,137 @@ tbody tr.total td {
       var w = payout(gross, v.tax);
       w.units = u;
       w.paidUnits = u * paidFor;
+      w.refunded = u - w.paidUnits;
       return w;
     }
     return {
+      firstWeek: firstWeek,
+      tail: v.tail,
       week:  milestone(firstWeek, gWeek),
       month: milestone(firstMonth, gMonth),
       year:  milestone(firstYear, gYear)
     };
   }
 
+  // ── the sales curve: cumulative copies, week 0 → 52 ──
+  var SVG_NS = "http://www.w3.org/2000/svg";
+  var curveEl = $("curve"), curveTip = $("curve-tip");
+  var curveData = null;
+
+  function niceStep(max) {
+    var raw = max / 3;
+    var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var r = raw / mag;
+    return (r >= 5 ? 5 : r >= 2 ? 2 : 1) * mag;
+  }
+  function node(tag, attrs, parent) {
+    var n = document.createElementNS(SVG_NS, tag);
+    for (var a in attrs) n.setAttribute(a, attrs[a]);
+    (parent || curveEl).appendChild(n);
+    return n;
+  }
+  function drawCurve(m) {
+    var W = curveEl.clientWidth || 440, H = 150;
+    var padL = 6, padR = 12, padT = 22, padB = 20;
+    var week1 = m.firstWeek, mult = m.tail;
+    var yMax = Math.max(cumulative(week1, mult, YEAR_WEEKS), 1);
+    var step = niceStep(yMax);
+    var yTop = Math.ceil(yMax / step) * step;
+
+    var x = function (wk) { return padL + (wk / YEAR_WEEKS) * (W - padL - padR); };
+    var y = function (u)  { return padT + (1 - u / yTop) * (H - padT - padB); };
+
+    curveEl.setAttribute("viewBox", "0 0 " + W + " " + H);
+    while (curveEl.firstChild) curveEl.removeChild(curveEl.firstChild);
+
+    // gridlines + tick labels, hairline and recessive
+    var grid = node("g", { "class": "grid" });
+    var axis = node("g", { "class": "axis" });
+    for (var t = step; t <= yTop; t += step) {
+      node("line", { x1: padL, x2: W - padR, y1: y(t), y2: y(t) }, grid);
+      var tl = node("text", { x: W - padR, y: y(t) - 4, "text-anchor": "end" }, axis);
+      tl.textContent = compact(t);
+    }
+    node("line", { x1: padL, x2: W - padR, y1: y(0), y2: y(0) }, grid);
+
+    // x axis: the milestones and the quarters
+    [[1, "wk 1"], [13, "mo 3"], [26, "mo 6"], [39, "mo 9"], [52, "yr 1"]].forEach(function (p) {
+      var xl = node("text", { x: x(p[0]), y: H - 5, "text-anchor": p[0] === 1 ? "start" : p[0] === 52 ? "end" : "middle" }, axis);
+      xl.textContent = p[1];
+    });
+
+    // the curve itself
+    var pts = [];
+    for (var wk = 0; wk <= YEAR_WEEKS; wk += 0.5) pts.push([x(wk), y(cumulative(week1, mult, wk))]);
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
+    node("path", { "class": "area", d: d + " L" + x(52).toFixed(1) + " " + y(0) + " L" + x(0) + " " + y(0) + " Z" });
+    node("path", { "class": "line", d: d });
+
+    // milestone markers: the three figures above, placed on the curve
+    var marks = node("g", { "class": "mark" });
+    [[1, m.week.units], [4, m.month.units], [52, m.year.units]].forEach(function (p, i) {
+      node("circle", { "class": "dot", cx: x(p[0]), cy: y(p[1]), r: 4.5 }, marks);
+      // The curve climbs away to the upper right, so the label sits below it.
+      if (i === 1) {
+        var lbl = node("text", { x: x(4) + 9, y: y(p[1]) + 14 }, marks);
+        lbl.textContent = "month 1";
+      }
+    });
+
+    // hover: crosshair + readout
+    var cross = node("line", { "class": "cross", x1: 0, x2: 0, y1: padT - 6, y2: y(0) });
+    var hover = node("rect", { "class": "hover", x: padL, y: 0, width: W - padL - padR, height: H });
+    curveData = { x: x, y: y, W: W, padL: padL, padR: padR, week1: week1, mult: mult, cross: cross };
+    hover.addEventListener("mousemove", onHover);
+    hover.addEventListener("mouseleave", offHover);
+    hover.addEventListener("touchstart", onHover, { passive: true });
+    hover.addEventListener("touchmove", onHover, { passive: true });
+    hover.addEventListener("touchend", offHover);
+
+    curveEl.setAttribute("aria-label",
+      "Cumulative copies sold over the first year: " + units(m.week.units) + " by week one, " +
+      units(m.month.units) + " by month one, " + units(m.year.units) + " by week 52.");
+  }
+  function onHover(ev) {
+    if (!curveData) return;
+    var c = curveData;
+    var rect = curveEl.getBoundingClientRect();
+    var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
+    var scale = c.W / rect.width;
+    var px = cx * scale;
+    var wk = Math.round((px - c.padL) / (c.W - c.padL - c.padR) * YEAR_WEEKS);
+    wk = Math.min(YEAR_WEEKS, Math.max(1, wk));
+    var u = cumulative(c.week1, c.mult, wk);
+    var sx = c.x(wk);
+    c.cross.setAttribute("x1", sx); c.cross.setAttribute("x2", sx);
+    c.cross.classList.add("on");
+    curveTip.textContent = "Week " + wk + " · " + units(u) + " copies";
+    curveTip.style.left = (sx / scale) + "px";
+    curveTip.classList.add("on");
+  }
+  function offHover() {
+    if (curveData) curveData.cross.classList.remove("on");
+    curveTip.classList.remove("on");
+  }
+
   function render() {
     var v = read();
     var m = model(v);
-    var code = el.cur.value;
 
-    $("v-price").textContent   = "$" + v.price.toFixed(2);
-    $("v-wl").textContent      = units(v.wl);
-    $("v-late").textContent    = pct(v.late * 100);
-    $("v-conv").textContent    = pct(v.conv * 100);
-    $("v-organic").textContent = v.organic.toFixed(1) + "×";
-    $("v-tail").textContent    = v.tail.toFixed(1) + "×";
-    $("v-reg").textContent     = pct(v.reg * 100);
-    $("v-ref").textContent     = pct(v.ref * 100);
-    $("cur-alt").textContent   = code;
+    $("cur-alt").textContent = el.cur.value;
+    markPricePoint(v.price);
 
-    // One column per milestone, one row per line of the breakdown, so every
-    // figure on the page appears exactly once.
+    // ── copies, then the money they turn into ──
     [["wk", m.week], ["mo", m.month], ["yr", m.year]].forEach(function (col) {
       var k = col[0], w = col[1];
-      $("n-" + k).textContent = units(w.units);
+      $("u-" + k).textContent = units(w.units);
+      $("r-" + k).textContent = w.refunded >= 0.5 ? units(w.refunded) + " refunded" : "no refunds";
       $("g-" + k).textContent = money(w.gross);
       $("c-" + k).textContent = "−" + money(w.cut);
       $("w-" + k).textContent = "−" + money(w.withheld);
       $("t-" + k).textContent = money(w.take);
     });
+    drawCurve(m);
 
     var y = m.year;
     $("l-steam").textContent = "Steam's cut (" +
@@ -1038,36 +1361,44 @@ tbody tr.total td {
       pct(pTax) + ", you keep " + pct(pTake) + ".");
 
     var paid = y.paidUnits;
+    $("o-paid").textContent = units(paid);
     $("o-eff").textContent = paid > 0 ? money2(y.gross / paid) : "—";
     $("o-per").textContent = paid > 0 ? money2(y.take / paid) : "—";
+    $("t-units").textContent = compact(y.units);
     $("t-take").textContent = money(y.take);
-    // A short live region: dragging a slider announces the headline, not all 15 cells.
-    $("live").textContent = "First-year take-home " + moneyExact(y.take) + " " + unitCode();
-
+    // A short live region: dragging a slider announces the headline, not every cell.
+    $("live").textContent = "First year: " + units(y.units) + " copies, " +
+      moneyExact(y.take) + " " + unitCode() + " take-home";
 
     save();
   }
 
   // ── state in the URL hash + localStorage ──
+  // v2 stores the typed values themselves; v1 links stored the wishlist slider
+  // position and are still read.
   var KEY = "kolide.steam-estimator";
+  var ORDER = ["price", "wl", "conv", "organic", "tail", "reg", "ref"];
   function serialize() {
-    return [el.price.value, el.wl.value, el.conv.value, el.organic.value,
-            el.tail.value, el.reg.value, el.ref.value, el.tax.value,
-            el.cur.value, el.rate.value, el.late.value].join(",");
+    return ["v2"].concat(ORDER.map(get)).concat([
+      el.tax.value, el.cur.value, el.rate.value, get("late")
+    ]).join(",");
   }
   function apply(str) {
     var p = String(str).split(",");
-    if (p.length < 8) return false;
-    var order = ["price", "wl", "conv", "organic", "tail", "reg", "ref", "tax"];
-    for (var i = 0; i < order.length; i++) {
-      if (p[i] !== "" && isFinite(parseFloat(p[i]))) el[order[i]].value = p[i];
+    var v1 = p[0] !== "v2";
+    if (v1 && p.length < 8) return false;
+    if (!v1) p.shift();
+    for (var i = 0; i < ORDER.length; i++) {
+      var x = parseFloat(p[i]);
+      if (!isFinite(x)) continue;
+      // v1 wishlists were a slider position unless the link predates the slider.
+      if (v1 && ORDER[i] === "wl" && x <= 1000) x = posToWl(x);
+      setValue(ORDER[i], x);
     }
-    // Links saved while wishlists was a typed field carry the raw count.
-    if (parseFloat(p[1]) > 1000) el.wl.value = wlToPos(parseFloat(p[1]));
+    if (p[7] !== undefined && isFinite(parseFloat(p[7]))) el.tax.value = p[7];
     if (p[8]) el.cur.value = p[8];
     if (p[9] && isFinite(parseFloat(p[9]))) el.rate.value = p[9];
-    // Links saved before the late-wishlist slider predate the calendar.
-    el.late.value = p[10] && isFinite(parseFloat(p[10])) ? p[10] : 0;
+    setValue("late", p[10] && isFinite(parseFloat(p[10])) ? parseFloat(p[10]) : 0);
     return true;
   }
   function save() {
@@ -1076,14 +1407,7 @@ tbody tr.total td {
 
   function setPreset(name) {
     var p = PRESETS[name] || PRESETS.indie;
-    el.price.value   = p.price;
-    el.wl.value      = wlToPos(p.wl);
-    el.late.value    = p.late;
-    el.conv.value    = p.conv;
-    el.organic.value = p.organic;
-    el.tail.value    = p.tail;
-    el.reg.value     = p.reg;
-    el.ref.value     = p.ref;
+    KEYS.forEach(function (k) { setValue(k, p[k]); });
     markPreset(name);
     render();
   }
@@ -1092,6 +1416,18 @@ tbody tr.total td {
       c.setAttribute("aria-pressed", String(c.dataset.preset === name));
     });
   }
+  function markPricePoint(price) {
+    Array.prototype.forEach.call(document.querySelectorAll(".pt"), function (b) {
+      b.setAttribute("aria-pressed", String(Math.abs(parseFloat(b.dataset.price) - price) < 0.005));
+    });
+  }
+  Array.prototype.forEach.call(document.querySelectorAll(".pt"), function (b) {
+    b.addEventListener("click", function () {
+      setValue("price", parseFloat(b.dataset.price));
+      markPreset(null);
+      render();
+    });
+  });
 
   // ── build the currency select ──
   CURRENCIES.forEach(function (c) {
@@ -1119,16 +1455,15 @@ tbody tr.total td {
   $("cur-usd").addEventListener("click", function () { setUnit(false); });
   $("cur-alt").addEventListener("click", function () { setUnit(true); });
 
-  // ── wiring ──
-  ["price", "wl", "late", "conv", "organic", "tail", "reg", "ref"].forEach(function (k) {
-    el[k].addEventListener("input", function () { markPreset(null); render(); });
-  });
   el.tax.addEventListener("change", render);
   el.rate.addEventListener("input", render);
 
   Array.prototype.forEach.call(document.querySelectorAll(".chip"), function (c) {
     c.addEventListener("click", function () { setPreset(c.dataset.preset); });
   });
+
+  // Enter in a number field settles it rather than submitting the form.
+  $("controls").addEventListener("submit", function (e) { e.preventDefault(); });
 
   function flash(btn, text) {
     var old = btn.dataset.label || btn.textContent;
@@ -1159,14 +1494,15 @@ tbody tr.total td {
   $("btn-copy").addEventListener("click", function () {
     var v = read(), m = model(v);
     function block(name, w) {
-      return name + ": " + units(w.units) + " units · gross " + moneyExact(w.gross) +
-             " · take-home " + moneyExact(w.take);
+      return name + ": " + units(w.units) + " copies (" + units(w.refunded) + " refunded) · gross " +
+             moneyExact(w.gross) + " · take-home " + moneyExact(w.take);
     }
     var lines = [
       "Steam revenue estimate",
       "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists (" +
         pct(v.late * 100) + " added in the final 8 weeks) · " +
-        pct(v.conv * 100) + " week-one conversion",
+        pct(v.conv * 100) + " week-one conversion · " + v.organic.toFixed(1) + "× beyond wishlists · " +
+        v.tail.toFixed(1) + "× year one",
       "",
       block("First week", m.week),
       block("First month", m.month),
@@ -1195,7 +1531,15 @@ tbody tr.total td {
     setPreset("indie");
   });
 
+  // The curve is sized to its box, so redraw when the box changes.
+  var resizeT;
+  window.addEventListener("resize", function () {
+    clearTimeout(resizeT);
+    resizeT = setTimeout(render, 120);
+  });
+
   // ── boot: URL hash wins, then saved state, then the default preset ──
+  KEYS.forEach(function (k) { setValue(k, parseFloat(FIELDS[k].num.value)); });
   var booted = false;
   if (location.hash.length > 1) booted = apply(decodeURIComponent(location.hash.slice(1)));
   if (!booted) {
