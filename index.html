@@ -4,14 +4,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Steam Revenue Estimator</title>
-<meta name="description" content="Estimate how many copies a Steam game sells in its first week, month and year from wishlists and price, then what you take home after Steam's cut, refunds, regional pricing and US withholding tax." />
+<meta name="description" content="Estimate a Steam launch in the Personal Calendar era: wishlists held before the window, wishlists gained inside it, copies sold and take-home revenue for the first week, month and year." />
 <meta name="theme-color" content="#EADDCA" media="(prefers-color-scheme: light)" />
 <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23111111'/%3E%3Crect x='7' y='7' width='18' height='18' fill='%23C7352A'/%3E%3C/svg%3E" />
 
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Steam Revenue Estimator" />
-<meta property="og:description" content="Wishlists in, copies and take-home out. First week, first month, first year — with Steam's cut, refunds, regional pricing and withholding tax." />
+<meta property="og:description" content="Wishlists in, copies and take-home out. Built for the Personal Calendar era: long-held wishlists and calendar-window wishlists convert on their own terms." />
 <meta name="twitter:card" content="summary" />
 
 <style>
@@ -23,6 +23,7 @@
   --surface:    #F2E9DA;
   --line:       rgba(17,17,17,0.16);
   --line-soft:  rgba(17,17,17,0.08);
+  --band:       rgba(17,17,17,0.05);
   --text:       #111111;
   --text-dim:   #6A6053;
   --text-faint: #8E8375;
@@ -41,6 +42,7 @@
     --surface:    #191817;
     --line:       rgba(234,221,202,0.18);
     --line-soft:  rgba(234,221,202,0.09);
+    --band:       rgba(234,221,202,0.05);
     --text:       #EADDCA;
     --text-dim:   #A2988A;
     --text-faint: #7E7568;
@@ -59,6 +61,7 @@
   --surface:    #191817;
   --line:       rgba(234,221,202,0.18);
   --line-soft:  rgba(234,221,202,0.09);
+  --band:       rgba(234,221,202,0.05);
   --text:       #EADDCA;
   --text-dim:   #A2988A;
   --text-faint: #7E7568;
@@ -100,7 +103,7 @@ body {
 }
 
 /* label mixin used by legends, eyebrows, the colophon */
-.eyebrow, legend, thead th, .colophon, .byline, .presets > span, .stat .k, .notes summary, .notes h3 {
+.eyebrow, legend, thead th, .colophon, .byline, .presets > span, .notes summary, .notes h3 {
   font-family: var(--f-display);
   font-size: 11px;
   font-weight: 700;
@@ -128,7 +131,6 @@ h1 {
   margin: 0;
 }
 h1 em { font-style: normal; color: var(--accent); }
-.lede { margin: 8px 0 0; color: var(--text-dim); font-size: 14px; max-width: 52ch; }
 .byline {
   display: flex;
   align-items: center;
@@ -191,14 +193,14 @@ h1 em { font-style: normal; color: var(--accent); }
 }
 .ticker .k { color: var(--text-faint); }
 .ticker .v {
-  font-family: var(--f-display);
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1;
+  font-family: var(--f-data);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
   white-space: nowrap;
 }
-.ticker .v small { font-size: 13px; font-weight: 400; color: var(--text-dim); margin-left: 8px; }
+.ticker .v i { font-style: normal; color: var(--text-faint); padding: 0 6px; }
 
 /* ── layout ─────────────────────────────────────────────────────────── */
 .cols {
@@ -367,61 +369,8 @@ select {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
-.panel-head .sub { font-size: 12.5px; color: var(--text-faint); }
-
-/* copies sold: the headline */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 18px;
-}
-.stat { display: grid; gap: 5px; min-width: 0; }
-.stat .k { color: var(--text-faint); }
-.stat .v {
-  font-family: var(--f-display);
-  font-size: clamp(27px, 3.1vw, 36px);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-.stat .s { font-size: 12px; color: var(--text-dim); white-space: nowrap; }
-
-/* cumulative copies over the year */
-.curve { margin: 18px 0 0; position: relative; }
-.curve svg { display: block; width: 100%; height: 150px; overflow: visible; }
-.curve .grid line { stroke: var(--line-soft); stroke-width: 1; }
-.curve .axis text { font-family: var(--f-data); font-size: 10.5px; fill: var(--text-faint); }
-.curve .area { fill: var(--accent); opacity: 0.10; }
-.curve .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
-.curve .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
-.curve .mark text { font-family: var(--f-data); font-size: 10.5px; fill: var(--text-dim); }
-.curve .cross { stroke: var(--text-dim); stroke-width: 1; opacity: 0; pointer-events: none; }
-.curve .hover { fill: transparent; cursor: crosshair; }
-.curve .cross.on { opacity: 1; }
-.tip-box {
-  position: absolute;
-  top: 0;
-  transform: translate(-50%, -4px);
-  padding: 4px 8px;
-  font-family: var(--f-data);
-  font-size: 11.5px;
-  color: var(--text);
-  background: var(--ground);
-  border: 1px solid var(--line);
-  border-radius: 3px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 80ms;
-}
-.tip-box.on { opacity: 1; }
-
-/* money */
-.money { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
 .units {
   display: flex;
   border: 1px solid var(--line);
@@ -445,6 +394,52 @@ select {
 .unit:hover { color: var(--text); }
 .unit[aria-pressed="true"] { background: var(--text); color: var(--ground); }
 
+/* the timeline: calendar window, launch, first year */
+.timeline { margin: 4px 0 0; position: relative; }
+.timeline svg { display: block; width: 100%; height: 176px; overflow: visible; }
+.timeline .band { fill: var(--band); }
+.timeline .grid line { stroke: var(--line-soft); stroke-width: 1; }
+.timeline .launch { stroke: var(--text); stroke-width: 1; }
+.timeline .axis text, .timeline .lbl { font-family: var(--f-data); font-size: 10.5px; fill: var(--text-faint); }
+.timeline .lbl { fill: var(--text-dim); }
+.timeline .wl { fill: none; stroke: var(--text-dim); stroke-width: 2; stroke-dasharray: 5 4; stroke-linecap: round; }
+.timeline .area { fill: var(--accent); opacity: 0.10; }
+.timeline .line { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.timeline .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.timeline .dot.wl-dot { fill: var(--text-dim); }
+.timeline .cross { stroke: var(--text-dim); stroke-width: 1; opacity: 0; pointer-events: none; }
+.timeline .cross.on { opacity: 1; }
+.timeline .hover { fill: transparent; cursor: crosshair; }
+.tip-box {
+  position: absolute;
+  top: 0;
+  transform: translate(-50%, -4px);
+  padding: 4px 8px;
+  font-family: var(--f-data);
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--ground);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 80ms;
+}
+.tip-box.on { opacity: 1; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-dim); }
+.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; font-style: normal; }
+.legend .k-wl   { width: 14px; height: 0; border-top: 2px dashed var(--text-dim); vertical-align: 3px; }
+.legend .k-copy { width: 14px; height: 0; border-top: 2px solid var(--accent); vertical-align: 3px; }
+.legend .k-band { background: var(--band); border: 1px solid var(--line-soft); }
+.legend .k-cut  { background: var(--bar-cut); }
+.legend .k-tax  { background: var(--bar-tax); background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px); }
+.legend .k-take { background: var(--bar-take); }
+.timeline + .legend { margin-top: 8px; }
+
+/* the table: copies and money side by side, no line louder than another */
+.figures { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line); }
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 th, td { padding: 8px 0; text-align: left; }
 thead th { color: var(--text-faint); border-bottom: 1px solid var(--line); padding-bottom: 9px; }
@@ -465,22 +460,15 @@ tbody td {
   color: var(--text);
   border-bottom: 1px solid var(--line-soft);
 }
-/* Deductions read as deductions by their minus sign, not by colour — red is
-   reserved for money you keep, in the table and in the bar alike. */
+/* Deductions read as deductions by their minus sign, not by colour. */
 tbody tr.minus td { color: var(--text-dim); }
-tbody tr.total th, tbody tr.total td { border-bottom: 0; padding-top: 13px; }
-tbody tr.total th { color: var(--text); font-weight: 600; }
-tbody tr.total td {
-  font-family: var(--f-display);
-  font-size: 21px;
-  font-weight: 700;
-  line-height: 1.1;
-  letter-spacing: -0.01em;
-  color: var(--accent);
-}
+tbody tr.key th { color: var(--text); font-weight: 600; }
+tbody tr.key td { font-weight: 600; }
+tbody tr.gap th, tbody tr.gap td { padding-top: 14px; }
+tbody tr:last-child th, tbody tr:last-child td { border-bottom: 0; }
 
 /* stacked split bar */
-.bar { display: flex; gap: 2px; height: 14px; margin: 18px 0 10px; }
+.bar { display: flex; gap: 2px; height: 12px; margin: 16px 0 10px; }
 .bar span { min-width: 3px; transition: flex-basis 180ms ease; }
 .bar .seg-cut  { background: var(--bar-cut); }
 .bar .seg-tax  {
@@ -490,12 +478,6 @@ tbody tr.total td {
 .bar .seg-take { background: var(--bar-take); }
 .bar span:first-child { border-radius: 3px 0 0 3px; }
 .bar span:last-child  { border-radius: 0 3px 3px 0; }
-
-.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--text-dim); }
-.legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; vertical-align: -1px; font-style: normal; }
-.legend .k-cut  { background: var(--bar-cut); }
-.legend .k-tax  { background: var(--bar-tax); background-image: repeating-linear-gradient(135deg, var(--line) 0 3px, transparent 3px 7px); }
-.legend .k-take { background: var(--bar-take); }
 
 .kpis {
   display: grid;
@@ -566,6 +548,8 @@ tbody tr.total td {
 .notes summary::before { content: "+ "; color: var(--accent); }
 .notes[open] summary::before { content: "− "; }
 .notes summary:hover { color: var(--accent); }
+.notes p { max-width: 70ch; font-size: 13.5px; color: var(--text-dim); margin: 16px 0 0; }
+.notes p b { color: var(--text); font-weight: 600; }
 .notes dl {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -647,18 +631,15 @@ tbody tr.total td {
   fieldset { margin-bottom: 24px; }
 }
 @media (max-width: 420px) {
-  .stats { gap: 10px 12px; }
-  .stat .v { font-size: 24px; }
-  .stat .s { font-size: 11px; }
   .kpis { grid-template-columns: 1fr 1fr; }
   table { font-size: 12.5px; }
   thead th + th, tbody td { padding-left: 8px; }
   tbody th { font-size: 12.5px; }
-  tbody tr.total td { font-size: 17px; }
   .pair { grid-template-columns: 1fr; }
   .pair .num { width: 100%; }
   .num { width: 118px; }
   .num.wide { width: 132px; }
+  .timeline svg { height: 160px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -671,10 +652,7 @@ tbody tr.total td {
 <div class="wrap">
 
   <header class="mast">
-    <div>
-      <h1>Steam Revenue <em>Estimator</em></h1>
-      <p class="lede">How many copies your game sells in its first week, month and year — and what lands in your bank account.</p>
-    </div>
+    <h1>Steam Revenue <em>Estimator</em></h1>
     <div class="byline">
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
       <span class="sep" aria-hidden="true"></span>
@@ -692,7 +670,7 @@ tbody tr.total td {
 
   <div class="ticker" aria-hidden="true">
     <span class="k eyebrow">First year</span>
-    <span class="v"><span id="t-units">—</span> copies<small id="t-take">—</small></span>
+    <span class="v"><span id="t-units">—</span> copies<i>·</i><span id="t-take">—</span></span>
   </div>
 
   <div class="cols">
@@ -701,7 +679,7 @@ tbody tr.total td {
     <form id="controls" autocomplete="off" novalidate>
 
       <fieldset>
-        <legend>Your game</legend>
+        <legend>Your launch</legend>
 
         <div class="field">
           <label for="i-price">Store price</label>
@@ -718,28 +696,35 @@ tbody tr.total td {
         </div>
 
         <div class="field">
-          <label for="i-wl">Wishlists at launch</label>
-          <div class="num wide"><input type="number" id="i-wl" min="0" max="10000000" step="1" value="10000" inputmode="numeric" /></div>
-          <input type="range" id="s-wl" min="0" max="1000" step="1" value="500" aria-label="Wishlists slider" />
-          <div class="tip">Type the exact count, or drag — the slider runs 100 to 1,000,000 on a log scale.</div>
+          <label for="i-held">Wishlists before the calendar window</label>
+          <div class="num wide"><input type="number" id="i-held" min="0" max="10000000" step="1" value="7000" inputmode="numeric" /></div>
+          <input type="range" id="s-held" min="0" max="1000" step="1" value="500" aria-label="Long-held wishlists slider" />
+          <div class="tip">Held before your release date went public and the final eight weeks began. Type the exact count, or drag on a log scale.</div>
         </div>
 
         <div class="field">
-          <label for="i-late">Added in the final 8 weeks</label>
-          <div class="num"><input type="number" id="i-late" min="0" max="100" step="1" value="30" inputmode="numeric" /><span class="suf">%</span></div>
-          <input type="range" id="s-late" min="0" max="80" step="5" value="30" aria-label="Late wishlists slider" />
-          <div class="tip">Wishlists gained inside Steam's calendar window. Counted at half weight.</div>
+          <label for="i-win">Wishlists gained in the window</label>
+          <div class="num wide"><input type="number" id="i-win" min="0" max="10000000" step="1" value="3000" inputmode="numeric" /></div>
+          <input type="range" id="s-win" min="0" max="1000" step="1" value="400" aria-label="Calendar-window wishlists slider" />
+          <div class="tip">Drive-by adds from Steam's Personal Calendar in the eight weeks before launch. Set to 0 if you launch without a public date.</div>
         </div>
       </fieldset>
 
       <fieldset>
-        <legend>How it sells</legend>
+        <legend>How they convert</legend>
 
         <div class="field">
-          <label for="i-conv">Week-one conversion</label>
+          <label for="i-conv">Long-held wishlists, week one</label>
           <div class="num"><input type="number" id="i-conv" min="0" max="100" step="0.5" value="12" inputmode="decimal" /><span class="suf">%</span></div>
-          <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" aria-label="Conversion slider" />
-          <div class="tip">Of long-held wishlists that buy in week one. Median is around 10%; 15–20% is a strong launch.</div>
+          <input type="range" id="s-conv" min="1" max="40" step="0.5" value="12" aria-label="Long-held conversion slider" />
+          <div class="tip">Share that buy in the first week. Median is around 10%; 15–20% is a strong launch.</div>
+        </div>
+
+        <div class="field">
+          <label for="i-winconv">Calendar-window wishlists, week one</label>
+          <div class="num"><input type="number" id="i-winconv" min="0" max="100" step="0.5" value="6" inputmode="decimal" /><span class="suf">%</span></div>
+          <input type="range" id="s-winconv" min="0" max="40" step="0.5" value="6" aria-label="Calendar-window conversion slider" />
+          <div class="tip">No public data yet on calendar-era wishlists. Half the long-held rate is a guess; adjust once you have your own numbers.</div>
         </div>
 
         <div class="field">
@@ -806,42 +791,24 @@ tbody tr.total td {
       <p class="sr-only" aria-live="polite" id="live"></p>
 
       <div class="panel-head">
-        <span class="eyebrow">Copies sold</span>
-        <span class="sub">before refunds</span>
+        <span class="eyebrow">Calendar window to year one</span>
+        <span class="units" role="group" aria-label="Show figures in">
+          <button class="unit" type="button" id="cur-usd" aria-pressed="true">USD</button>
+          <button class="unit" type="button" id="cur-alt" aria-pressed="false">EUR</button>
+        </span>
       </div>
 
-      <div class="stats">
-        <div class="stat">
-          <div class="k">First week</div>
-          <div class="v" id="u-wk">—</div>
-          <div class="s" id="r-wk">—</div>
-        </div>
-        <div class="stat">
-          <div class="k">First month</div>
-          <div class="v" id="u-mo">—</div>
-          <div class="s" id="r-mo">—</div>
-        </div>
-        <div class="stat">
-          <div class="k">First year</div>
-          <div class="v" id="u-yr">—</div>
-          <div class="s" id="r-yr">—</div>
-        </div>
-      </div>
-
-      <figure class="curve" aria-label="Cumulative copies sold over the first year">
-        <svg id="curve" role="img"></svg>
-        <div class="tip-box" id="curve-tip"></div>
+      <figure class="timeline" aria-label="Wishlists through the calendar window, then cumulative copies sold over the first year">
+        <svg id="timeline" role="img"></svg>
+        <div class="tip-box" id="timeline-tip"></div>
       </figure>
+      <div class="legend">
+        <span><i class="k-band"></i>Calendar window, 8 weeks</span>
+        <span><i class="k-wl"></i>Wishlists</span>
+        <span><i class="k-copy"></i>Copies sold</span>
+      </div>
 
-      <div class="money">
-        <div class="panel-head">
-          <span class="eyebrow">What you take home</span>
-          <span class="units" role="group" aria-label="Show figures in">
-            <button class="unit" type="button" id="cur-usd" aria-pressed="true">USD</button>
-            <button class="unit" type="button" id="cur-alt" aria-pressed="false">EUR</button>
-          </span>
-        </div>
-
+      <div class="figures">
         <table>
           <thead><tr>
             <th scope="col"><span class="sr-only">Line</span></th>
@@ -850,7 +817,15 @@ tbody tr.total td {
             <th scope="col">First year</th>
           </tr></thead>
           <tbody>
-            <tr>
+            <tr class="key">
+              <th scope="row">Copies sold</th>
+              <td id="n-wk">—</td><td id="n-mo">—</td><td id="n-yr">—</td>
+            </tr>
+            <tr class="minus">
+              <th scope="row" id="l-ref">Refunded</th>
+              <td id="r-wk">—</td><td id="r-mo">—</td><td id="r-yr">—</td>
+            </tr>
+            <tr class="gap">
               <th scope="row">Gross revenue</th>
               <td id="g-wk">—</td><td id="g-mo">—</td><td id="g-yr">—</td>
             </tr>
@@ -862,7 +837,7 @@ tbody tr.total td {
               <th scope="row" id="l-wh">Withholding</th>
               <td id="w-wk">—</td><td id="w-mo">—</td><td id="w-yr">—</td>
             </tr>
-            <tr class="total">
+            <tr class="key">
               <th scope="row">Take-home</th>
               <td id="t-wk">—</td><td id="t-mo">—</td><td id="t-yr">—</td>
             </tr>
@@ -882,8 +857,8 @@ tbody tr.total td {
 
         <div class="kpis">
           <div class="kpi">
-            <div class="k">Copies you're paid for</div>
-            <div class="v" id="o-paid">—</div>
+            <div class="k">Wishlists at launch</div>
+            <div class="v" id="o-wl">—</div>
           </div>
           <div class="kpi">
             <div class="k">Avg. sale price</div>
@@ -906,13 +881,17 @@ tbody tr.total td {
 
   <details class="notes">
     <summary>How it's calculated</summary>
+    <p><b>Why the calendar window.</b> Steam's Personal Calendar puts every game with a
+       public release date in the next eight weeks on the front page of everyone who
+       might care. Games now pick up a late wave of wishlists they never used to get —
+       but those are drive-by adds from a calendar, not people who followed the game
+       for a year, and they shouldn't be expected to convert the same way. So this
+       estimator asks for the two piles separately and lets each buy at its own rate.</p>
     <ol class="steps">
       <li><b>First-week copies</b>
-        <code>wishlists × (1 − late share ÷ 2) × conversion × beyond wishlists</code>
-        <span>Since Steam's Personal Calendar hit the homepage, a game with a public date
-              picks up a wave of drive-by wishlists in its final eight weeks. Those are
-              counted at half weight: the conversion rate you set is for wishlists held
-              longer than that.</span></li>
+        <code>(long-held × their rate + window × its rate) × beyond wishlists</code>
+        <span>Each pile of wishlists converts at the rate you gave it, then the organic
+              multiplier adds buyers who never wishlisted at all.</span></li>
       <li><b>First-year copies</b>
         <code>first week × year-one sales</code>
         <span>A 2.5× game sells one and a half times its opening week again over the
@@ -943,9 +922,13 @@ tbody tr.total td {
 
     <h3>Assumptions</h3>
     <dl>
-      <dt>Late wishlists convert at half</dt>
-      <dd>There's no public data yet on calendar-era wishlists; half is a guess. Set the
-          share to 0% to switch it off.</dd>
+      <dt>Window wishlists arrive evenly</dt>
+      <dd>The timeline draws them as a straight ramp across the eight weeks. In practice
+          the day the date goes public is a spike; the total is what the model uses.</dd>
+
+      <dt>Window wishlists convert at half</dt>
+      <dd>The default, not a finding — there's no public data yet on calendar-era
+          wishlists. Change the rate or set the count to 0.</dd>
 
       <dt>Steam's cut is tiered</dt>
       <dd>30% up to $10M lifetime gross, 25% to $50M, 20% above. Almost every indie
@@ -981,7 +964,7 @@ tbody tr.total td {
 
   <div class="colophon">
     <!-- bump this on every change that alters the numbers or the inputs -->
-    <span>Steam Revenue Estimator <span class="ver" id="ver">v2.0</span> <span class="ver-date">· Sep 2026</span></span>
+    <span>Steam Revenue Estimator <span class="ver" id="ver">v2.1</span> <span class="ver-date">· Sep 2026</span></span>
     <span class="byline">
       <a href="https://hanialkarrain.com" target="_blank" rel="noopener">Hani</a>
       <span class="sep" aria-hidden="true"></span>
@@ -1016,32 +999,35 @@ tbody tr.total td {
   CURRENCIES.forEach(function (c) { SYMBOLS[c[0]] = c[3]; });
 
   var PRESETS = {
-    impulse: { price: 4.99,  wl: 6000,   late: 40, conv: 15, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
-    indie:   { price: 9.99,  wl: 10000,  late: 30, conv: 12, organic: 1.4, tail: 2.5, reg: 25, ref: 8  },
-    premium: { price: 24.99, wl: 30000,  late: 20, conv: 10, organic: 1.3, tail: 2.0, reg: 22, ref: 6  },
-    hit:     { price: 19.99, wl: 250000, late: 35, conv: 18, organic: 2.2, tail: 3.5, reg: 24, ref: 6  }
+    impulse: { price: 4.99,  held: 3600,   win: 2400,  conv: 15, winconv: 7.5, organic: 1.8, tail: 3.0, reg: 30, ref: 10 },
+    indie:   { price: 9.99,  held: 7000,   win: 3000,  conv: 12, winconv: 6,   organic: 1.4, tail: 2.5, reg: 25, ref: 8  },
+    premium: { price: 24.99, held: 24000,  win: 6000,  conv: 10, winconv: 5,   organic: 1.3, tail: 2.0, reg: 22, ref: 6  },
+    hit:     { price: 19.99, held: 160000, win: 90000, conv: 18, winconv: 9,   organic: 2.2, tail: 3.5, reg: 24, ref: 6  }
   };
 
   var $ = function (id) { return document.getElementById(id); };
 
-  // ── wishlist slider: log scale, 100 → 1,000,000 over 0–1000 ──
+  // ── wishlist sliders: 0 at the left end, then log scale 100 → 1,000,000 ──
   var WL_MIN = 100, WL_SPAN = 4; // decades
   function posToWl(pos) {
+    if (pos <= 0) return 0;
     var raw = WL_MIN * Math.pow(10, (pos / 1000) * WL_SPAN);
     var mag = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10) - 1);
     return Math.max(WL_MIN, Math.round(raw / mag) * mag);
   }
   function wlToPos(w) {
-    return Math.round(1000 * Math.log(Math.max(WL_MIN, w) / WL_MIN) / Math.LN10 / WL_SPAN);
+    if (w <= 0) return 0;
+    return Math.max(1, Math.round(1000 * Math.log(Math.max(WL_MIN, w) / WL_MIN) / Math.LN10 / WL_SPAN));
   }
 
   // ── inputs: each value has a typed field (the truth) and a slider (a handle) ──
   // The number field can go past the slider's range; the slider just pins to its end.
   var FIELDS = {
     price:   { min: 0.99, max: 199.99, dec: 2 },
-    wl:      { min: 0,    max: 1e7,    dec: 0, log: true },
-    late:    { min: 0,    max: 100,    dec: 0 },
+    held:    { min: 0,    max: 1e7,    dec: 0, log: true },
+    win:     { min: 0,    max: 1e7,    dec: 0, log: true },
     conv:    { min: 0,    max: 100,    dec: 1 },
+    winconv: { min: 0,    max: 100,    dec: 1 },
     organic: { min: 1,    max: 10,     dec: 1 },
     tail:    { min: 1,    max: 30,     dec: 1 },
     reg:     { min: 0,    max: 90,     dec: 0 },
@@ -1151,9 +1137,10 @@ tbody tr.total td {
   function read() {
     return {
       price:   get("price"),
-      wl:      get("wl"),
-      late:    get("late") / 100,
+      held:    get("held"),
+      win:     get("win"),
       conv:    get("conv") / 100,
+      winconv: get("winconv") / 100,
       organic: get("organic"),
       tail:    get("tail"),
       reg:     get("reg") / 100,
@@ -1163,9 +1150,8 @@ tbody tr.total td {
   }
 
   var YEAR_WEEKS = 52;
-  // Wishlists added inside the Personal Calendar's eight-week window are
-  // drive-by adds; no public conversion data yet, so they count at half.
-  var LATE_WEIGHT = 0.5;
+  // Steam's Personal Calendar shows games releasing in the next eight weeks.
+  var WINDOW_WEEKS = 8;
   // Week one feels only half the year's price erosion: regional pricing and
   // VAT apply from day one, deep discounts come later.
   var LAUNCH_SHARE = 0.5;
@@ -1180,6 +1166,12 @@ tbody tr.total td {
     var a = Math.log(yearMult) / Math.log(YEAR_WEEKS);
     return week1 * Math.pow(Math.min(weeks, YEAR_WEEKS), a);
   }
+  // Wishlists across the window: the long-held pile, plus the window's adds
+  // arriving evenly over its eight weeks. Weeks are negative before launch.
+  function wishlistsAt(v, weeks) {
+    var t = Math.min(Math.max(weeks + WINDOW_WEEKS, 0), WINDOW_WEEKS) / WINDOW_WEEKS;
+    return v.held + v.win * t;
+  }
 
   // Steam's tiers run from the first dollar earned, so a launch window's cut
   // is just steamCut() of its own gross.
@@ -1191,7 +1183,8 @@ tbody tr.total td {
   }
 
   function model(v) {
-    var firstWeek  = v.wl * (1 - v.late * (1 - LATE_WEIGHT)) * v.conv * v.organic;
+    // Each pile of wishlists buys at its own rate; organic buyers scale the sum.
+    var firstWeek  = (v.held * v.conv + v.win * v.winconv) * v.organic;
     var firstYear  = firstWeek * v.tail;
     var firstMonth = cumulative(firstWeek, v.tail, 4);
 
@@ -1217,6 +1210,7 @@ tbody tr.total td {
       return w;
     }
     return {
+      wishlists: v.held + v.win,
       firstWeek: firstWeek,
       tail: v.tail,
       week:  milestone(firstWeek, gWeek),
@@ -1225,10 +1219,10 @@ tbody tr.total td {
     };
   }
 
-  // ── the sales curve: cumulative copies, week 0 → 52 ──
+  // ── the timeline: eight weeks of calendar window, launch, then the year ──
   var SVG_NS = "http://www.w3.org/2000/svg";
-  var curveEl = $("curve"), curveTip = $("curve-tip");
-  var curveData = null;
+  var tlEl = $("timeline"), tlTip = $("timeline-tip");
+  var tlData = null;
 
   function niceStep(max) {
     var raw = max / 3;
@@ -1239,91 +1233,115 @@ tbody tr.total td {
   function node(tag, attrs, parent) {
     var n = document.createElementNS(SVG_NS, tag);
     for (var a in attrs) n.setAttribute(a, attrs[a]);
-    (parent || curveEl).appendChild(n);
+    (parent || tlEl).appendChild(n);
     return n;
   }
-  function drawCurve(m) {
-    var W = curveEl.clientWidth || 440, H = 150;
-    var padL = 6, padR = 12, padT = 22, padB = 20;
+  function drawTimeline(m, v) {
+    var W = tlEl.clientWidth || 440, H = tlEl.clientHeight || 176;
+    var padL = 6, padR = 12, padT = 26, padB = 22;
     var week1 = m.firstWeek, mult = m.tail;
-    var yMax = Math.max(cumulative(week1, mult, YEAR_WEEKS), 1);
+    var yMax = Math.max(m.wishlists, cumulative(week1, mult, YEAR_WEEKS), 1);
     var step = niceStep(yMax);
     var yTop = Math.ceil(yMax / step) * step;
 
-    var x = function (wk) { return padL + (wk / YEAR_WEEKS) * (W - padL - padR); };
+    var x = function (wk) { return padL + ((wk + WINDOW_WEEKS) / (YEAR_WEEKS + WINDOW_WEEKS)) * (W - padL - padR); };
     var y = function (u)  { return padT + (1 - u / yTop) * (H - padT - padB); };
+    var fmt = function (n) { return n.toFixed(1); };
 
-    curveEl.setAttribute("viewBox", "0 0 " + W + " " + H);
-    while (curveEl.firstChild) curveEl.removeChild(curveEl.firstChild);
+    tlEl.setAttribute("viewBox", "0 0 " + W + " " + H);
+    while (tlEl.firstChild) tlEl.removeChild(tlEl.firstChild);
 
-    // gridlines + tick labels, hairline and recessive
+    // the calendar window, as a band behind everything
+    node("rect", { "class": "band", x: x(-WINDOW_WEEKS), y: padT - 8, width: x(0) - x(-WINDOW_WEEKS), height: y(0) - padT + 8 });
+
+    // gridlines + tick labels, hairline and recessive. The year-end copies
+    // label shares the right edge, so a tick that would sit on it stays mute.
+    var yrLblY = y(m.year.units) - 10;
     var grid = node("g", { "class": "grid" });
     var axis = node("g", { "class": "axis" });
     for (var t = step; t <= yTop; t += step) {
       node("line", { x1: padL, x2: W - padR, y1: y(t), y2: y(t) }, grid);
+      if (Math.abs((y(t) - 4) - yrLblY) < 12) continue;
       var tl = node("text", { x: W - padR, y: y(t) - 4, "text-anchor": "end" }, axis);
       tl.textContent = compact(t);
     }
     node("line", { x1: padL, x2: W - padR, y1: y(0), y2: y(0) }, grid);
 
-    // x axis: the milestones and the quarters
-    [[1, "wk 1"], [13, "mo 3"], [26, "mo 6"], [39, "mo 9"], [52, "yr 1"]].forEach(function (p) {
-      var xl = node("text", { x: x(p[0]), y: H - 5, "text-anchor": p[0] === 1 ? "start" : p[0] === 52 ? "end" : "middle" }, axis);
+    // launch, the line the whole picture turns on
+    node("line", { "class": "launch", x1: x(0), x2: x(0), y1: padT - 8, y2: y(0) });
+
+    // x axis: launch, then the quarters. The window's width is in the legend.
+    [[0, "launch", "start", 5], [13, "mo 3", "middle", 0], [26, "mo 6", "middle", 0],
+     [39, "mo 9", "middle", 0], [52, "yr 1", "end", 0]].forEach(function (p) {
+      var xl = node("text", { x: x(p[0]) + p[3], y: H - 5, "text-anchor": p[2] }, axis);
       xl.textContent = p[1];
     });
 
-    // the curve itself
+    // wishlists, dashed, climbing through the window to launch
+    var wd = "M" + fmt(x(-WINDOW_WEEKS)) + " " + fmt(y(v.held)) + " L" + fmt(x(0)) + " " + fmt(y(m.wishlists));
+    node("path", { "class": "wl", d: wd });
+
+    // copies, solid, from launch through the year
     var pts = [];
     for (var wk = 0; wk <= YEAR_WEEKS; wk += 0.5) pts.push([x(wk), y(cumulative(week1, mult, wk))]);
-    var d = pts.map(function (p, i) { return (i ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); }).join(" ");
-    node("path", { "class": "area", d: d + " L" + x(52).toFixed(1) + " " + y(0) + " L" + x(0) + " " + y(0) + " Z" });
+    var d = pts.map(function (p, i) { return (i ? "L" : "M") + fmt(p[0]) + " " + fmt(p[1]); }).join(" ");
+    node("path", { "class": "area", d: d + " L" + fmt(x(52)) + " " + fmt(y(0)) + " L" + fmt(x(0)) + " " + fmt(y(0)) + " Z" });
     node("path", { "class": "line", d: d });
 
-    // milestone markers: the three figures above, placed on the curve
+    // markers: wishlists at launch, then the three copy milestones
     var marks = node("g", { "class": "mark" });
-    [[1, m.week.units], [4, m.month.units], [52, m.year.units]].forEach(function (p, i) {
+    node("circle", { "class": "dot wl-dot", cx: x(0), cy: y(m.wishlists), r: 4.5 }, marks);
+    [[1, m.week.units], [4, m.month.units], [52, m.year.units]].forEach(function (p) {
       node("circle", { "class": "dot", cx: x(p[0]), cy: y(p[1]), r: 4.5 }, marks);
-      // The curve climbs away to the upper right, so the label sits below it.
-      if (i === 1) {
-        var lbl = node("text", { x: x(4) + 9, y: y(p[1]) + 14 }, marks);
-        lbl.textContent = "month 1";
-      }
     });
+    // Two direct labels: the wishlists you launch with, the copies you end with.
+    var wlLbl = node("text", { "class": "lbl", x: x(0) + 8, y: y(m.wishlists) - 9 }, marks);
+    wlLbl.textContent = compact(m.wishlists) + " wishlists";
+    var yrLbl = node("text", { "class": "lbl", x: x(52), y: yrLblY, "text-anchor": "end" }, marks);
+    yrLbl.textContent = compact(m.year.units) + " copies";
 
     // hover: crosshair + readout
-    var cross = node("line", { "class": "cross", x1: 0, x2: 0, y1: padT - 6, y2: y(0) });
+    var cross = node("line", { "class": "cross", x1: 0, x2: 0, y1: padT - 8, y2: y(0) });
     var hover = node("rect", { "class": "hover", x: padL, y: 0, width: W - padL - padR, height: H });
-    curveData = { x: x, y: y, W: W, padL: padL, padR: padR, week1: week1, mult: mult, cross: cross };
+    tlData = { x: x, W: W, padL: padL, padR: padR, v: v, week1: week1, mult: mult, cross: cross };
     hover.addEventListener("mousemove", onHover);
     hover.addEventListener("mouseleave", offHover);
     hover.addEventListener("touchstart", onHover, { passive: true });
     hover.addEventListener("touchmove", onHover, { passive: true });
     hover.addEventListener("touchend", offHover);
 
-    curveEl.setAttribute("aria-label",
-      "Cumulative copies sold over the first year: " + units(m.week.units) + " by week one, " +
-      units(m.month.units) + " by month one, " + units(m.year.units) + " by week 52.");
+    tlEl.setAttribute("aria-label",
+      units(v.held) + " wishlists before the calendar window, " + units(m.wishlists) + " at launch. " +
+      "Cumulative copies: " + units(m.week.units) + " by week one, " + units(m.month.units) +
+      " by month one, " + units(m.year.units) + " by week 52.");
   }
   function onHover(ev) {
-    if (!curveData) return;
-    var c = curveData;
-    var rect = curveEl.getBoundingClientRect();
+    if (!tlData) return;
+    var c = tlData;
+    var rect = tlEl.getBoundingClientRect();
     var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX) - rect.left;
     var scale = c.W / rect.width;
     var px = cx * scale;
-    var wk = Math.round((px - c.padL) / (c.W - c.padL - c.padR) * YEAR_WEEKS);
-    wk = Math.min(YEAR_WEEKS, Math.max(1, wk));
-    var u = cumulative(c.week1, c.mult, wk);
+    var wk = Math.round((px - c.padL) / (c.W - c.padL - c.padR) * (YEAR_WEEKS + WINDOW_WEEKS)) - WINDOW_WEEKS;
+    wk = Math.min(YEAR_WEEKS, Math.max(-WINDOW_WEEKS, wk));
+    var label;
+    if (wk <= 0) {
+      var ago = -wk;
+      label = (ago === 0 ? "Launch" : ago + (ago === 1 ? " week" : " weeks") + " before launch") +
+              " · " + units(wishlistsAt(c.v, wk)) + " wishlists";
+    } else {
+      label = "Week " + wk + " · " + units(cumulative(c.week1, c.mult, wk)) + " copies";
+    }
     var sx = c.x(wk);
     c.cross.setAttribute("x1", sx); c.cross.setAttribute("x2", sx);
     c.cross.classList.add("on");
-    curveTip.textContent = "Week " + wk + " · " + units(u) + " copies";
-    curveTip.style.left = (sx / scale) + "px";
-    curveTip.classList.add("on");
+    tlTip.textContent = label;
+    tlTip.style.left = (sx / scale) + "px";
+    tlTip.classList.add("on");
   }
   function offHover() {
-    if (curveData) curveData.cross.classList.remove("on");
-    curveTip.classList.remove("on");
+    if (tlData) tlData.cross.classList.remove("on");
+    tlTip.classList.remove("on");
   }
 
   function render() {
@@ -1333,19 +1351,20 @@ tbody tr.total td {
     $("cur-alt").textContent = el.cur.value;
     markPricePoint(v.price);
 
-    // ── copies, then the money they turn into ──
+    // One column per milestone, one row per line, copies and money alike.
     [["wk", m.week], ["mo", m.month], ["yr", m.year]].forEach(function (col) {
       var k = col[0], w = col[1];
-      $("u-" + k).textContent = units(w.units);
-      $("r-" + k).textContent = w.refunded >= 0.5 ? units(w.refunded) + " refunded" : "no refunds";
+      $("n-" + k).textContent = units(w.units);
+      $("r-" + k).textContent = "−" + units(w.refunded);
       $("g-" + k).textContent = money(w.gross);
       $("c-" + k).textContent = "−" + money(w.cut);
       $("w-" + k).textContent = "−" + money(w.withheld);
       $("t-" + k).textContent = money(w.take);
     });
-    drawCurve(m);
+    drawTimeline(m, v);
 
     var y = m.year;
+    $("l-ref").textContent = "Refunded (" + pct(v.ref * 100) + ")";
     $("l-steam").textContent = "Steam's cut (" +
       pct(y.gross > 0 ? y.cut / y.gross * 100 : 30) + ")";
     $("l-wh").textContent = "Withholding (" + pct(v.tax * 100) + ")";
@@ -1364,7 +1383,7 @@ tbody tr.total td {
       pct(pTax) + ", you keep " + pct(pTake) + ".");
 
     var paid = y.paidUnits;
-    $("o-paid").textContent = units(paid);
+    $("o-wl").textContent = units(m.wishlists);
     $("o-eff").textContent = paid > 0 ? money2(y.gross / paid) : "—";
     $("o-per").textContent = paid > 0 ? money2(y.take / paid) : "—";
     $("t-units").textContent = compact(y.units);
@@ -1377,31 +1396,45 @@ tbody tr.total td {
   }
 
   // ── state in the URL hash + localStorage ──
-  // v2 stores the typed values themselves; v1 links stored the wishlist slider
-  // position and are still read.
+  // v3 stores the two wishlist piles and their rates. v2 stored one wishlist
+  // count with a late share; v1 stored the wishlist slider position. Both
+  // are still read.
   var KEY = "kolide.steam-estimator";
-  var ORDER = ["price", "wl", "conv", "organic", "tail", "reg", "ref"];
+  var ORDER = ["price", "held", "win", "conv", "winconv", "organic", "tail", "reg", "ref"];
   function serialize() {
-    return ["v2"].concat(ORDER.map(get)).concat([
-      el.tax.value, el.cur.value, el.rate.value, get("late")
-    ]).join(",");
+    return ["v3"].concat(ORDER.map(get)).concat([el.tax.value, el.cur.value, el.rate.value]).join(",");
+  }
+  function num(s) { var x = parseFloat(s); return isFinite(x) ? x : null; }
+  function applyLegacy(p, v1) {
+    // [price, wl, conv, organic, tail, reg, ref, tax, cur, rate, late]
+    if (p.length < 8) return false;
+    var wl = num(p[1]);
+    if (wl !== null && v1 && wl <= 1000) wl = WL_MIN * Math.pow(10, (wl / 1000) * WL_SPAN);
+    var late = (num(p[10]) || 0) / 100;
+    var conv = num(p[2]);
+    if (num(p[0]) !== null) setValue("price", num(p[0]));
+    if (wl !== null) { setValue("held", wl * (1 - late)); setValue("win", wl * late); }
+    if (conv !== null) { setValue("conv", conv); setValue("winconv", conv / 2); }
+    if (num(p[3]) !== null) setValue("organic", num(p[3]));
+    if (num(p[4]) !== null) setValue("tail", num(p[4]));
+    if (num(p[5]) !== null) setValue("reg", num(p[5]));
+    if (num(p[6]) !== null) setValue("ref", num(p[6]));
+    if (num(p[7]) !== null) el.tax.value = p[7];
+    if (p[8]) el.cur.value = p[8];
+    if (num(p[9])) el.rate.value = p[9];
+    return true;
   }
   function apply(str) {
     var p = String(str).split(",");
-    var v1 = p[0] !== "v2";
-    if (v1 && p.length < 8) return false;
-    if (!v1) p.shift();
+    if (p[0] === "v2") return applyLegacy(p.slice(1), false);
+    if (p[0] !== "v3") return applyLegacy(p, true);
+    p.shift();
     for (var i = 0; i < ORDER.length; i++) {
-      var x = parseFloat(p[i]);
-      if (!isFinite(x)) continue;
-      // v1 wishlists were a slider position unless the link predates the slider.
-      if (v1 && ORDER[i] === "wl" && x <= 1000) x = posToWl(x);
-      setValue(ORDER[i], x);
+      if (num(p[i]) !== null) setValue(ORDER[i], num(p[i]));
     }
-    if (p[7] !== undefined && isFinite(parseFloat(p[7]))) el.tax.value = p[7];
-    if (p[8]) el.cur.value = p[8];
-    if (p[9] && isFinite(parseFloat(p[9]))) el.rate.value = p[9];
-    setValue("late", p[10] && isFinite(parseFloat(p[10])) ? parseFloat(p[10]) : 0);
+    if (num(p[9]) !== null) el.tax.value = p[9];
+    if (p[10]) el.cur.value = p[10];
+    if (num(p[11])) el.rate.value = p[11];
     return true;
   }
   function save() {
@@ -1502,9 +1535,9 @@ tbody tr.total td {
     }
     var lines = [
       "Steam revenue estimate",
-      "$" + v.price.toFixed(2) + " · " + units(v.wl) + " wishlists (" +
-        pct(v.late * 100) + " added in the final 8 weeks) · " +
-        pct(v.conv * 100) + " week-one conversion · " + v.organic.toFixed(1) + "× beyond wishlists · " +
+      "$" + v.price.toFixed(2) + " · " + units(v.held) + " wishlists + " + units(v.win) +
+        " gained in the calendar window · week-one conversion " + pct(v.conv * 100) + " / " +
+        pct(v.winconv * 100) + " · " + v.organic.toFixed(1) + "× beyond wishlists · " +
         v.tail.toFixed(1) + "× year one",
       "",
       block("First week", m.week),
@@ -1535,7 +1568,7 @@ tbody tr.total td {
     setPreset("indie");
   });
 
-  // The curve is sized to its box, so redraw when the box changes.
+  // The timeline is sized to its box, so redraw when the box changes.
   var resizeT;
   window.addEventListener("resize", function () {
     clearTimeout(resizeT);
